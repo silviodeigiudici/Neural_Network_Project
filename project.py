@@ -63,11 +63,11 @@ print('Predicted:', decode_predictions(preds, top=3)[0])
 
 from nevergrad import instrumentation as inst
 
-arg1 = inst.var.OrderedDiscrete([1, 2])
-arg2 = inst.var.OrderedDiscrete([3, 4])
+arg1 = inst.variables.OrderedDiscrete([1, 2])
+arg2 = inst.variables.OrderedDiscrete([4, 3])
 
 def myfunction(arg1, arg2):
-    return arg1 + arg2
+    return (arg1 - arg2)**2
 
 ifunc = inst.InstrumentedFunction(myfunction, arg1, arg2)
 
@@ -81,6 +81,15 @@ optimizer = optimizerlib.TwoPointsDE(dimension=ifunc.dimension, budget=100)
 recommendation = optimizer.optimize(ifunc)
 
 print(recommendation)
+
+args, kwargs = ifunc.data_to_arguments(recommendation, deterministic=True)
+
+print(args)    # should print ["b", "e", "blublu"]
+print(kwargs)  # should print {"value": 0} because -.5 * std + mean = 0
+
+# but be careful, since some variables are stochastic (SoftmaxCategorical ones are), setting deterministic=False may yield different results
+# The following will print more information on the conversion to your arguments:
+print(ifunc.get_summary(recommendation))
 
 def square(x):
     return sum((x - .5)**2)
