@@ -141,7 +141,7 @@ def function_net(i1, j1, r1, g1, b1, i2, j2, r2, g2, b2, i3, j3, r3, g3, b3, i4,
     x = np.expand_dims(x, axis=0)
     x = preprocess_input(x)
     preds = model.predict(x)
-    return decode_predictions(preds, top=3)[0][0][2]
+    return decode_predictions(preds, top=3)[0][0][2] #TODO: try to use a vector in order to minimize the best 3 classes of imagenet, not only the first
 
 #ifunc = inst.InstrumentedFunction(myfunction, arg1, arg2)
 ifunc = inst.InstrumentedFunction(function_net, i1, j1, r1, g1, b1, i2, j2, r2, g2, b2, i3, j3, r3, g3, b3, i4, j4, r4, g4, b4, i5, j5, r5, g5, b5, model, img)
