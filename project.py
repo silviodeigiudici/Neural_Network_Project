@@ -1,212 +1,170 @@
-from keras.applications.vgg16 import VGG16
-from keras.preprocessing import image
-from keras.applications.vgg16 import preprocess_input, decode_predictions
-
 from keras.datasets import cifar10
+###########class associated with each number########
+#airplane : 0
+#automobile : 1
+#bird : 2
+#cat : 3
+#deer : 4
+#dog : 5
+#frog : 6
+#horse : 7
+#ship : 8
+#truck : 9
+#################
 
 import numpy as np
 
+import matplotlib.pyplot as plt
+
+#nevergrad
 from nevergrad import instrumentation as inst
 from nevergrad.optimization import optimizerlib
+import nevergrad.optimization as optimization
 
-from PIL import Image
+from concurrent import futures
 
 import copy
 
-'''
-#model = VGG16(weights='imagenet', include_top=False)
-#model = VGG16(weights='path_to_weight', include_top=False)
-model = VGG16(weights=None, include_top=True, input_shape=(32, 32, 3))
+#import the module implementing a neural network that we want to fool
+import neuralnet
 
+#setting data
+img_index = 2 #image that will be modified
+number_of_pixel = 1 #number of pixel that we will try to change (IT CAN BE: 1, 3, 5)
+budget = 1000 #number of iterations
+#############
+
+#load model
+model = neuralnet.cifar10vgg(False)
+
+#load cifar10 dataset
 (x_train, y_train), (x_test, y_test) = cifar10.load_data()
 
-print(x_train.shape)
-print(y_train.shape)
+#shows the original image
+plt.imshow(x_test[img_index])
+plt.show()
 
-model.compile(loss='sparse_categorical_crossentropy',
-              optimizer='adam',
-              metrics=['accuracy'])
+#x_train = x_train.astype('float32')
+x_test = x_test.astype('float32')
 
-model.fit(x_train, y_train, epochs=20, batch_size=64, shuffle=True)
+target = y_test[img_index][0]
 
-print("Done")
+#y_train = keras.utils.to_categorical(y_train, 10) #trasform the class into an array (0 .. 1 ... 0)
+#y_test = keras.utils.to_categorical(y_test, 10)
 
-results = model.predict(x_test, batch_size=16)
-'''
+input = np.ndarray((1, 32, 32, 3))
+input[0] = x_test[img_index]
 
+#predict the class of the original image
+original_preds = model.predict(input)
 
+#function that return the arguments used by nevergrad
+def new_point():
+    row = inst.variables.OrderedDiscrete(range(0, 32))
+    col = inst.variables.OrderedDiscrete(range(0, 32))
+    r = inst.variables.OrderedDiscrete(range(0, 255))
+    g = inst.variables.OrderedDiscrete(range(0, 255))
+    b = inst.variables.OrderedDiscrete(range(0, 255))
+    return row, col, r, g, b
 
-model = VGG16(weights='imagenet', include_top=True)
+#setting arguments
+i1, j1, r1, g1, b1 = new_point()
+i2, j2, r2, g2, b2 = new_point()
+i3, j3, r3, g3, b3 = new_point()
+i4, j4, r4, g4, b4 = new_point()
+i5, j5, r5, g5, b5 = new_point()
 
-#(x_train, y_train), (x_test, y_test) = cifar10.load_data()
+#function that will be optimized for 1 pixel
+def function_net1(i1, j1, r1, g1, b1, target, model, input):
+    print("Iteration...")
+    img = copy.deepcopy(input)
 
-model.compile(loss='sparse_categorical_crossentropy',
-              optimizer='adam',
-              metrics=['accuracy'])
+    img[0][i1][j1] = r1, g1, b1
 
+    preds = model.predict(img)
 
+    return preds[0][target]
 
-#results = model.predict(x_test)
-'''
-score = model.evaluate(x_test, y_test, verbose=0)
-print('Test loss:', score[0])
-print('Test accuracy:', score[1])
-'''
+#function that will be optimized for 3 pixels
+def function_net3(i1, j1, r1, g1, b1, i2, j2, r2, g2, b2, i3, j3, r3, g3, b3, target, model, input):
+    print("Iteration...")
+    img = copy.deepcopy(input)
 
+    img[0][i1][j1] = r1, g1, b1
+    img[0][i2][j2] = r2, g2, b2
+    img[0][i3][j3] = r3, g3, b3
 
+    preds = model.predict(img)
 
-img_path = 'image.jpg'
-img = image.load_img(img_path, target_size=(224, 224))
+    return preds[0][target]
 
-img.save('my.png')
+#function that will be optimized for 5 pixels
+def function_net5(i1, j1, r1, g1, b1, i2, j2, r2, g2, b2, i3, j3, r3, g3, b3, i4, j4, r4, g4, b4, i5, j5, r5, g5, b5, target, model, input):
+    print("Iteration...")
+    img = copy.deepcopy(input)
 
-'''
-pixelmap = img.load()
-pixelmap[0,0] = (0, 0, 0)
-pixelmap[0,1] = (0, 0, 0)
-pixelmap[0,2] = (0, 0, 0)
-pixelmap[0,3] = (0, 0, 0)
-pixelmap[0,4] = (0, 0, 0)
-img.save('save.png')
+    img[0][i1][j1] = r1, g1, b1
+    img[0][i2][j2] = r2, g2, b2
+    img[0][i3][j3] = r3, g3, b3
+    img[0][i4][j4] = r4, g4, b4
+    img[0][i5][j5] = r5, g5, b5
 
+    preds = model.predict(img)
 
-x = image.img_to_array(img)
+    return preds[0][target]
 
+#setting arguments for the function
+if number_of_pixel == 1:
+    ifunc = inst.InstrumentedFunction(function_net1, i1, j1, r1, g1, b1, target, model, input)
+if number_of_pixel == 3:
+    ifunc = inst.InstrumentedFunction(function_net3, i1, j1, r1, g1, b1, i2, j2, r2, g2, b2, i3, j3, r3, g3, b3, target, model, input)
+if number_of_pixel == 5:
+    ifunc = inst.InstrumentedFunction(function_net5, i1, j1, r1, g1, b1, i2, j2, r2, g2, b2, i3, j3, r3, g3, b3, i4, j4, r4, g4, b4, i5, j5, r5, g5, b5, target, model, input)
 
-img = Image.fromarray(x, 'RGB')
-#img.save('my.png')
-img.show()
+#asynch implementation
+optim = optimization.registry["TwoPointsDE"](dimension=ifunc.dimension, budget=budget)
 
+with futures.ThreadPoolExecutor(max_workers=optim.num_workers) as executor:
+    recommendation = optim.optimize(ifunc, executor=executor)
 
-x = np.expand_dims(x, axis=0)
-x = preprocess_input(x)
+#synch implementation (not used)
+#optimizer = optimizerlib.TwoPointsDE(dimension=ifunc.dimension, budget=2000)
+#recommendation = optimizer.optimize(ifunc)
 
-
-preds = model.predict(x)
-# decode the results into a list of tuples (class, description, probability)
-# (one such list for each sample in the batch)
-print('Predicted:', decode_predictions(preds, top=3)[0])
-'''
-
-x = image.img_to_array(img)
-x = np.expand_dims(x, axis=0)
-x = preprocess_input(x)
-preds = model.predict(x)
-print(decode_predictions(preds, top=3)[0])
-
-
-i1 = inst.variables.OrderedDiscrete(range(0, 224))
-j1 = inst.variables.OrderedDiscrete(range(0, 224))
-r1 = inst.variables.OrderedDiscrete(range(0, 255))
-g1 = inst.variables.OrderedDiscrete(range(0, 255))
-b1 = inst.variables.OrderedDiscrete(range(0, 255))
-
-i2 = inst.variables.OrderedDiscrete(range(0, 224))
-j2 = inst.variables.OrderedDiscrete(range(0, 224))
-r2 = inst.variables.OrderedDiscrete(range(0, 255))
-g2 = inst.variables.OrderedDiscrete(range(0, 255))
-b2 = inst.variables.OrderedDiscrete(range(0, 255))
-
-i3 = inst.variables.OrderedDiscrete(range(0, 224))
-j3 = inst.variables.OrderedDiscrete(range(0, 224))
-r3 = inst.variables.OrderedDiscrete(range(0, 255))
-g3 = inst.variables.OrderedDiscrete(range(0, 255))
-b3 = inst.variables.OrderedDiscrete(range(0, 255))
-
-i4 = inst.variables.OrderedDiscrete(range(0, 224))
-j4 = inst.variables.OrderedDiscrete(range(0, 224))
-r4 = inst.variables.OrderedDiscrete(range(0, 255))
-g4 = inst.variables.OrderedDiscrete(range(0, 255))
-b4 = inst.variables.OrderedDiscrete(range(0, 255))
-
-i5 = inst.variables.OrderedDiscrete(range(0, 224))
-j5 = inst.variables.OrderedDiscrete(range(0, 224))
-r5 = inst.variables.OrderedDiscrete(range(0, 255))
-g5 = inst.variables.OrderedDiscrete(range(0, 255))
-b5 = inst.variables.OrderedDiscrete(range(0, 255))
-
-
-def function_net(i1, j1, r1, g1, b1, i2, j2, r2, g2, b2, i3, j3, r3, g3, b3, i4, j4, r4, g4, b4, i5, j5, r5, g5, b5, model, old_img):
-    print("Function")
-    img = copy.deepcopy(old_img)
-
-    pixelmap = img.load()
-    pixelmap[i1,j1] = (r1, g1, b1)
-    pixelmap[i2,j2] = (r2, g2, b2)
-    pixelmap[i3,j3] = (r3, g3, b3)
-    pixelmap[i4,j4] = (r4, g4, b4)
-    pixelmap[i5,j5] = (r5, g5, b5)
-
-    x = image.img_to_array(img)
-    x = np.expand_dims(x, axis=0)
-    x = preprocess_input(x)
-    preds = model.predict(x)
-    return decode_predictions(preds, top=3)[0][0][2] #TODO: try to use a vector in order to minimize the best 3 classes of imagenet, not only the first
-
-#ifunc = inst.InstrumentedFunction(myfunction, arg1, arg2)
-ifunc = inst.InstrumentedFunction(function_net, i1, j1, r1, g1, b1, i2, j2, r2, g2, b2, i3, j3, r3, g3, b3, i4, j4, r4, g4, b4, i5, j5, r5, g5, b5, model, img)
-
-# create the instrumented function using the "Instrumentation" instance above
-#ifunc = inst.instrument(myfunction)
-print(ifunc.dimension)  # 5 dimensional space as above
-
-
-optimizer = optimizerlib.TwoPointsDE(dimension=ifunc.dimension, budget=400)
-recommendation = optimizer.optimize(ifunc)
-
-print(recommendation)
-
+#getting results
 args, kwargs = ifunc.data_to_arguments(recommendation, deterministic=True)
 
-best_i1 = args[0]
-best_j1 = args[1]
-best_r1 = args[2]
-best_g1 = args[3]
-best_b1 = args[4]
+#modify the original image
+index = 0
+for i in range(0, number_of_pixel):
+    row = args[index]
+    col = args[index + 1]
+    rgb = args[index + 2], args[index + 3], args[index + 4]
+    input[0][row][col] = rgb
+    index += 5
 
-best_i2 = args[5]
-best_j2 = args[6]
-best_r2 = args[7]
-best_g2 = args[8]
-best_b2 = args[9]
+#prediction of the modified image
+preds = model.predict(input)
 
-best_i3 = args[10]
-best_j3 = args[11]
-best_r3 = args[12]
-best_g3 = args[13]
-best_b3 = args[14]
+#print value returned by the network
+print()
+print("Initial prediction:")
+print(original_preds)
+print()
+print("New prediction:")
+print(preds)
 
-best_i4 = args[15]
-best_j4 = args[16]
-best_r4 = args[17]
-best_g4 = args[18]
-best_b4 = args[19]
+#shows the modified image
+img = input.astype('uint8')
+plt.imshow(img[0])
 
-best_i5 = args[20]
-best_j5 = args[21]
-best_r5 = args[22]
-best_g5 = args[23]
-best_b5 = args[24]
+#print values modified
+print()
+print("Modified pixels")
+index = 0
+for k in range(0, number_of_pixel):
+    print("Pixel: (" + str(args[index + 1]) + ", " + str(args[index]) + ")", end=", ")
+    print("Rgb: (" + str(args[index + 2]) + ", " + str(args[index + 3]) + ", " + str(args[index + 4]) + ")")
+    index += 5
 
-
-pixelmap = img.load()
-pixelmap[best_i1,best_j1] = (best_r1, best_g1, best_b1)
-pixelmap[best_i2,best_j2] = (best_r2, best_g2, best_b2)
-pixelmap[best_i3,best_j3] = (best_r3, best_g3, best_b3)
-pixelmap[best_i4,best_j4] = (best_r4, best_g4, best_b4)
-pixelmap[best_i5,best_j5] = (best_r5, best_g5, best_b5)
-
-x = image.img_to_array(img)
-x = np.expand_dims(x, axis=0)
-x = preprocess_input(x)
-preds = model.predict(x)
-print("Hacked:")
-print(decode_predictions(preds, top=3)[0])
-img.save('save.png')
-
-print(args)    # should print ["b", "e", "blublu"]
-print(kwargs)  # should print {"value": 0} because -.5 * std + mean = 0
-
-# but be careful, since some variables are stochastic (SoftmaxCategorical ones are), setting deterministic=False may yield different results
-# The following will print more information on the conversion to your arguments:
-print(ifunc.get_summary(recommendation))
+plt.show()
