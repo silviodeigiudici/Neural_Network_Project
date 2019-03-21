@@ -16,38 +16,25 @@ import copy
 #import the module implementing a neural network that we want to fool
 import neuralnet
 
-#setting data
-img_index = 5 #image that will be modified
-number_of_pixel = 5 #number of pixel that we will try to change (IT CAN BE: 1, 3, 5)
-budget = 1000 #number of iterations
-#############
+##############################
+#SUPPORT FUNCTIONS
+#############################
 
-#class associated to each number
-dict = { 0:"airplane", 1:"automobile", 2:"bird", 3:"cat", 4:"deer", 5:"dog", 6:"frog", 7:"horse", 8:"ship", 9:"truck"}
+#function that return the class with higher value in preds
+def get_max_class(preds, dict):
+    index = 0
+    max = 0
+    index_max = 0
+    for v in preds[0]:
+        if v > max:
+            max = v
+            index_max = index
+        index += 1
+    return index_max
 
-#load model
-model = neuralnet.cifar10vgg(False)
-
-#load cifar10 dataset
-(x_train, y_train), (x_test, y_test) = cifar10.load_data()
-
-#shows the original image
-plt.imshow(x_test[img_index])
-plt.show()
-
-#x_train = x_train.astype('float32')
-x_test = x_test.astype('float32')
-
-target = y_test[img_index][0]
-
-#y_train = keras.utils.to_categorical(y_train, 10) #trasform the class into an array (0 .. 1 ... 0)
-#y_test = keras.utils.to_categorical(y_test, 10)
-
-input = np.ndarray((1, 32, 32, 3))
-input[0] = x_test[img_index]
-
-#predict the class of the original image
-original_preds = model.predict(input)
+#######################################################################################
+#FUNCTIONS NEVERGRAD
+########################################################################################
 
 #function that return the arguments used by nevergrad
 def new_point():
@@ -57,13 +44,6 @@ def new_point():
     g = inst.variables.OrderedDiscrete(range(0, 255))
     b = inst.variables.OrderedDiscrete(range(0, 255))
     return row, col, r, g, b
-
-#setting arguments
-i1, j1, r1, g1, b1 = new_point()
-i2, j2, r2, g2, b2 = new_point()
-i3, j3, r3, g3, b3 = new_point()
-i4, j4, r4, g4, b4 = new_point()
-i5, j5, r5, g5, b5 = new_point()
 
 #function that will be optimized for 1 pixel
 def function_net1(i1, j1, r1, g1, b1, target, model, input):
@@ -104,79 +84,138 @@ def function_net5(i1, j1, r1, g1, b1, i2, j2, r2, g2, b2, i3, j3, r3, g3, b3, i4
 
     return preds[0][target]
 
-#setting arguments for the function
-if number_of_pixel == 1:
-    ifunc = inst.InstrumentedFunction(function_net1, i1, j1, r1, g1, b1, target, model, input)
-if number_of_pixel == 3:
-    ifunc = inst.InstrumentedFunction(function_net3, i1, j1, r1, g1, b1, i2, j2, r2, g2, b2, i3, j3, r3, g3, b3, target, model, input)
-if number_of_pixel == 5:
-    ifunc = inst.InstrumentedFunction(function_net5, i1, j1, r1, g1, b1, i2, j2, r2, g2, b2, i3, j3, r3, g3, b3, i4, j4, r4, g4, b4, i5, j5, r5, g5, b5, target, model, input)
+#function that compute a perturbation, trying to fool the network (True if the algorithm find a solution)
+def fool_image(model, img, target, number_of_pixel, budget, show_image, dict):
 
-#asynch implementation
-optim = optimization.registry["TwoPointsDE"](dimension=ifunc.dimension, budget=budget)
+    #shows the original image
+    plt.imshow(img)
+    if show_image:
+        plt.show()
 
-with futures.ThreadPoolExecutor(max_workers=optim.num_workers) as executor:
-    recommendation = optim.optimize(ifunc, executor=executor)
+    input = np.ndarray((1, 32, 32, 3))
+    input[0] = img
 
-#synch implementation (not used)
-#optimizer = optimizerlib.TwoPointsDE(dimension=ifunc.dimension, budget=2000)
-#recommendation = optimizer.optimize(ifunc)
+    #x_train = x_train.astype('float32')
+    input = input.astype('float32')
 
-#getting results
-args, kwargs = ifunc.data_to_arguments(recommendation, deterministic=True)
+    #predict the class of the original image
+    original_preds = model.predict(input)
 
-#modify the original image
-index = 0
-for i in range(0, number_of_pixel):
-    row = args[index]
-    col = args[index + 1]
-    rgb = args[index + 2], args[index + 3], args[index + 4]
-    input[0][row][col] = rgb
-    index += 5
+    #setting arguments
+    i1, j1, r1, g1, b1 = new_point()
+    i2, j2, r2, g2, b2 = new_point()
+    i3, j3, r3, g3, b3 = new_point()
+    i4, j4, r4, g4, b4 = new_point()
+    i5, j5, r5, g5, b5 = new_point()
 
-#prediction of the modified image
-preds = model.predict(input)
+    #setting arguments for the function
+    if number_of_pixel == 1:
+        ifunc = inst.InstrumentedFunction(function_net1, i1, j1, r1, g1, b1, target, model, input)
+    if number_of_pixel == 3:
+        ifunc = inst.InstrumentedFunction(function_net3, i1, j1, r1, g1, b1, i2, j2, r2, g2, b2, i3, j3, r3, g3, b3, target, model, input)
+    if number_of_pixel == 5:
+        ifunc = inst.InstrumentedFunction(function_net5, i1, j1, r1, g1, b1, i2, j2, r2, g2, b2, i3, j3, r3, g3, b3, i4, j4, r4, g4, b4, i5, j5, r5, g5, b5, target, model, input)
 
-def get_max_class(preds):
+    #asynch implementation
+    optim = optimization.registry["TwoPointsDE"](dimension=ifunc.dimension, budget=budget)
+
+    with futures.ThreadPoolExecutor(max_workers=optim.num_workers) as executor:
+        recommendation = optim.optimize(ifunc, executor=executor)
+
+    #synch implementation (not used)
+    #optimizer = optimizerlib.TwoPointsDE(dimension=ifunc.dimension, budget=2000)
+    #recommendation = optimizer.optimize(ifunc)
+
+    #getting results
+    args, kwargs = ifunc.data_to_arguments(recommendation, deterministic=True)
+
+    #modify the original image
     index = 0
-    max = 0
-    index_max = 0
-    for v in preds[0]:
-        if v > max:
-            max = v
-            index_max = index
-        index += 1
-    return index_max
+    for i in range(0, number_of_pixel):
+        row = args[index]
+        col = args[index + 1]
+        rgb = args[index + 2], args[index + 3], args[index + 4]
+        input[0][row][col] = rgb
+        index += 5
 
-#print value returned by the network
-print()
-print("Initial prediction:")
-print(original_preds)
+    #prediction of the modified image
+    preds = model.predict(input)
 
-print()
-print("Real class: " + str(dict[target]))
+    #print value returned by the network
+    print()
+    print("Initial prediction:")
+    print(original_preds)
 
-print()
-print("Predicted class: " + str(dict[get_max_class(original_preds)]))
+    print()
+    print("Real class: " + str(dict[target]))
 
-print()
-print("New prediction:")
-print(preds)
+    print()
+    p_class = str(dict[get_max_class(original_preds, dict)])
+    print("Predicted class: " + p_class)
 
-print()
-print("New class: " + str(dict[get_max_class(preds)]))
+    print()
+    print("New prediction:")
+    print(preds)
 
-#shows the modified image
-img = input.astype('uint8')
-plt.imshow(img[0])
+    print()
+    n_class = str(dict[get_max_class(preds, dict)])
+    print("New class: " + n_class)
 
-#print values modified
-print()
-print("Modified pixels")
-index = 0
-for k in range(0, number_of_pixel):
-    print("Pixel: (" + str(args[index + 1]) + ", " + str(args[index]) + ")", end=", ")
-    print("Rgb: (" + str(args[index + 2]) + ", " + str(args[index + 3]) + ", " + str(args[index + 4]) + ")")
-    index += 5
+    #shows the modified image
+    img = input.astype('uint8')
+    plt.imshow(img[0])
 
-plt.show()
+    #print values modified
+    print()
+    print("Modified pixels")
+    index = 0
+    for k in range(0, number_of_pixel):
+        print("Pixel: (" + str(args[index + 1]) + ", " + str(args[index]) + ")", end=", ")
+        print("Rgb: (" + str(args[index + 2]) + ", " + str(args[index + 3]) + ", " + str(args[index + 4]) + ")")
+        index += 5
+
+    if show_image:
+        plt.show()
+
+    if p_class != n_class:
+        return True
+    else:
+        return False
+
+##############################################################################
+#SETTING UP
+#############################################################################
+
+################################
+#GLOBAL DATA
+#class associated to each number
+dict = { 0:"airplane", 1:"automobile", 2:"bird", 3:"cat", 4:"deer", 5:"dog", 6:"frog", 7:"horse", 8:"ship", 9:"truck"}
+start_img_index = 2 #number of the first image used in cifar10
+end_img_index = 3 #last number (NOT incluted)
+number_of_pixel = 1 #number of pixel that we will try to change (IT CAN BE: 1, 3, 5)
+budget = 1000 #number of iterations
+show_image = True #False = don't show the image
+###############################
+
+mispredicted_images = 0
+#load model
+model = neuralnet.cifar10vgg(False)
+
+#load cifar10 dataset
+(x_train, y_train), (x_test, y_test) = cifar10.load_data()
+
+for img_index in range(start_img_index, end_img_index): #image that will be modified
+
+    img = x_test[img_index]
+
+    target = y_test[img_index][0]
+
+    #y_train = keras.utils.to_categorical(y_train, 10) #trasform the class into an array (0 .. 1 ... 0)
+    #y_test = keras.utils.to_categorical(y_test, 10)
+
+    res = fool_image(model, img, target, number_of_pixel, budget, show_image, dict)
+    print(res)
+    if res == True:
+        mispredicted_images += 1
+
+print("Number of mis-predicted images: " + str(mispredicted_images))
