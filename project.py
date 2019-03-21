@@ -1,16 +1,4 @@
 from keras.datasets import cifar10
-###########class associated with each number########
-#airplane : 0
-#automobile : 1
-#bird : 2
-#cat : 3
-#deer : 4
-#dog : 5
-#frog : 6
-#horse : 7
-#ship : 8
-#truck : 9
-#################
 
 import numpy as np
 
@@ -29,10 +17,13 @@ import copy
 import neuralnet
 
 #setting data
-img_index = 2 #image that will be modified
-number_of_pixel = 1 #number of pixel that we will try to change (IT CAN BE: 1, 3, 5)
+img_index = 5 #image that will be modified
+number_of_pixel = 5 #number of pixel that we will try to change (IT CAN BE: 1, 3, 5)
 budget = 1000 #number of iterations
 #############
+
+#class associated to each number
+dict = { 0:"airplane", 1:"automobile", 2:"bird", 3:"cat", 4:"deer", 5:"dog", 6:"frog", 7:"horse", 8:"ship", 9:"truck"}
 
 #load model
 model = neuralnet.cifar10vgg(False)
@@ -146,13 +137,34 @@ for i in range(0, number_of_pixel):
 #prediction of the modified image
 preds = model.predict(input)
 
+def get_max_class(preds):
+    index = 0
+    max = 0
+    index_max = 0
+    for v in preds[0]:
+        if v > max:
+            max = v
+            index_max = index
+        index += 1
+    return index_max
+
 #print value returned by the network
 print()
 print("Initial prediction:")
 print(original_preds)
+
+print()
+print("Real class: " + str(dict[target]))
+
+print()
+print("Predicted class: " + str(dict[get_max_class(original_preds)]))
+
 print()
 print("New prediction:")
 print(preds)
+
+print()
+print("New class: " + str(dict[get_max_class(preds)]))
 
 #shows the modified image
 img = input.astype('uint8')
