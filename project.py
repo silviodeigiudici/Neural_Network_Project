@@ -13,6 +13,8 @@ from concurrent import futures
 
 import copy
 
+from random import randint
+
 #import the module implementing a neural network that we want to fool
 import neuralnet
 
@@ -31,6 +33,26 @@ def get_max_class(preds, dict):
             index_max = index
         index += 1
     return index_max
+
+def print_images(images, file):
+    f = open("save/Results.txt", "r")
+    s = f.read()
+    list = s.strip().split(",")
+    img_index = int(list[0].strip())
+    number_of_pixel = int((len(list) - 1)/5)
+    index = 1
+    image = images[img_index]
+    plt.imshow(image)
+    plt.show()
+    for i in range(0, number_of_pixel):
+        row = int(list[index])
+        col = int(list[index + 1])
+        rgb = int(list[index + 2]), int(list[index + 3]), int(list[index + 4])
+        image[row][col] = rgb
+        index += 5
+    plt.imshow(image)
+    plt.show()
+    f.close()
 
 #######################################################################################
 #FUNCTIONS NEVERGRAD
@@ -106,7 +128,7 @@ def function_net5(i1, j1, r1, g1, b1, i2, j2, r2, g2, b2, i3, j3, r3, g3, b3, i4
     return preds[0][target]
 
 #function that compute a perturbation, trying to fool the network (True if the algorithm find a solution)
-def fool_image(model, img, target, number_of_pixel, budget, show_image, dict):
+def fool_image(model, img, img_index, target, number_of_pixel, budget, show_image, dict, save, file):
 
     #shows the original image
     plt.imshow(img)
@@ -193,7 +215,9 @@ def fool_image(model, img, target, number_of_pixel, budget, show_image, dict):
     print()
     print("Modified pixels")
     index = 0
+    string = ""
     for k in range(0, number_of_pixel):
+        string += ", " + str(args[index]) + ", " + str(args[index + 1]) + ", " + str(args[index + 2]) + ", " + str(args[index + 3]) + ", " + str(args[index + 4])
         print("Pixel: (" + str(args[index + 1]) + ", " + str(args[index]) + ")", end=", ")
         print("Rgb: (" + str(args[index + 2]) + ", " + str(args[index + 3]) + ", " + str(args[index + 4]) + ")")
         index += 5
@@ -202,6 +226,9 @@ def fool_image(model, img, target, number_of_pixel, budget, show_image, dict):
         plt.show()
 
     if p_class != n_class:
+        if save:
+            line = str(img_index) + string
+            file.write(line)
         return True
     else:
         return False
@@ -214,11 +241,13 @@ def fool_image(model, img, target, number_of_pixel, budget, show_image, dict):
 #GLOBAL DATA
 #class associated to each number
 dict = { 0:"airplane", 1:"automobile", 2:"bird", 3:"cat", 4:"deer", 5:"dog", 6:"frog", 7:"horse", 8:"ship", 9:"truck"}
-start_img_index = 2 #number of the first image used in cifar10
-end_img_index = 3 #last number (NOT incluted)
-number_of_pixel = 1 #number of pixel that we will try to change (IT CAN BE: 1, 3, 5)
-budget = 1000 #number of iterations
-show_image = True #False = don't show the image
+#start_img_index = 2 #number of the first image used in cifar10
+#end_img_index = 3 #last number (NOT incluted)
+number_of_pixel = 5 #number of pixel that we will try to change (IT CAN BE: 1, 3, 5)
+budget = 1500 #number of iterations
+show_image = False #False = don't show the image
+save = True #if you want to save the result
+num_images = 10 #set the number of images to be extracted
 ###############################
 
 mispredicted_images = 0
@@ -228,7 +257,16 @@ model = neuralnet.cifar10vgg(False)
 #load cifar10 dataset
 (x_train, y_train), (x_test, y_test) = cifar10.load_data()
 
-for img_index in range(start_img_index, end_img_index): #image that will be modified
+#list = range(start_img_index, end_img_index) #USELESS if you use the random selection:
+
+#random images
+list = []
+max = len(x_test)
+for i in range(0, num_images):
+    list.append(randint(0, max))
+
+
+for img_index in list: #image that will be modified
 
     img = x_test[img_index]
 
@@ -237,9 +275,18 @@ for img_index in range(start_img_index, end_img_index): #image that will be modi
     #y_train = keras.utils.to_categorical(y_train, 10) #trasform the class into an array (0 .. 1 ... 0)
     #y_test = keras.utils.to_categorical(y_test, 10)
 
-    res = fool_image(model, img, target, number_of_pixel, budget, show_image, dict)
+    if save:
+        file = open("save/Results.txt", "w")
+
+    res = fool_image(model, img, img_index, target, number_of_pixel, budget, show_image, dict, save, file)
     print(res)
     if res == True:
         mispredicted_images += 1
+
+    if save:
+        file.close()
+
+#use this function if you want to print all the images in the file Results
+#print_images(x_test, "save/Results.txt")
 
 print("Number of mis-predicted images: " + str(mispredicted_images))

@@ -1,0 +1,1 @@
+num of pixel_num of iterations 
