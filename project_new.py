@@ -13,6 +13,9 @@ from concurrent import futures
 
 import copy
 
+from random import randint
+import random
+
 #import the module implementing a neural network that we want to fool
 import neuralnet
 
@@ -32,78 +35,97 @@ def get_max_class(preds, dict):
         index += 1
     return index_max
 
-#######################################################################################
-#FUNCTIONS NEVERGRAD
-########################################################################################
+#######################################
+#FUNCTIONS DIFFERENTIAL EVOLUTION
+#######################################
 
-#function that return the arguments used by nevergrad
-def new_point():
-    row = inst.variables.OrderedDiscrete(range(0, 32))
-    col = inst.variables.OrderedDiscrete(range(0, 32))
-    r = inst.variables.OrderedDiscrete(range(0, 255))
-    g = inst.variables.OrderedDiscrete(range(0, 255))
-    b = inst.variables.OrderedDiscrete(range(0, 255))
-    return row, col, r, g, b
-
-#function that will be optimized for 1 pixel
-def function_net1(i1, j1, r1, g1, b1, target, model, img):
-    #print("Iteration...")
-
-    store1 = copy.deepcopy(img[0][i1][j1])
-
-    img[0][i1][j1] = r1, g1, b1
-
+def function(model, target, img, dict, input):
+    row = int(input[0])
+    col = int(input[1])
+    r = int(input[2])
+    g = int(input[3])
+    b = int(input[4])
+    '''
+    row = int(input[0]*31)
+    col = int(input[1]*31)
+    r = int(input[2]*255)
+    g = int(input[3]*255)
+    b = int(input[4]*255)
+    '''
+    img = copy.deepcopy(img)
+    #store = img[0][row][col]
+    img[0][row][col] = r, g, b
     preds = model.predict(img)
-
-    img[0][i1][j1] = store1
-
+    if get_max_class(preds, dict) != target:
+        return -1
+    #img[0][row][col] = store
     return preds[0][target]
 
-#function that will be optimized for 3 pixels
-def function_net3(i1, j1, r1, g1, b1, i2, j2, r2, g2, b2, i3, j3, r3, g3, b3, target, model, img):
-    #print("Iteration...")
+def get_random_input():
+    x = float(randint(0, 31))
+    y = float(randint(0, 31))
+    r = float(randint(0, 255))
+    g = float(randint(0, 255))
+    b = float(randint(0, 255))
+    '''
+    x = random.uniform(0, 1)
+    y = random.uniform(0, 1)
+    r = random.uniform(0, 1)
+    g = random.uniform(0, 1)
+    b = random.uniform(0, 1)
+    '''
+    return x, y, r, g, b
 
-    store1 = copy.deepcopy(img[0][i1][j1])
-    store2 = copy.deepcopy(img[0][i2][j2])
-    store3 = copy.deepcopy(img[0][i3][j3])
+def new_par(pop, f, limit, i_parameter, population):
+    a = pop[randint(0, population - 1)][i_parameter]
+    b = pop[randint(0, population - 1)][i_parameter]
+    c = pop[randint(0, population - 1)][i_parameter]
+    return (a + f*(b - c)) % limit
+    '''
+    value = (a + f*(b - c))
+    if value > 1:
+        value = 1
+    if value < 0:
+        value = 0
+    return value
+    '''
 
-    img[0][i1][j1] = r1, g1, b1
-    img[0][i2][j2] = r2, g2, b2
-    img[0][i3][j3] = r3, g3, b3
+def differentialAlgorithm(model, target, img, iterations, population, f, range_pixel, range_rgb, dict):
+    pop = []
 
-    preds = model.predict(img)
+    for p in range(0, population):
+        pop.append(get_random_input())
 
-    img[0][i1][j1] = store1
-    img[0][i2][j2] = store2
-    img[0][i3][j3] = store3
+    for i in range(0, iterations):
+        print("Iteration: " + str(i))
+        for p in range(0, population):
+            print("Guy: " + str(p))
+            new = new_par(pop, f, range_pixel, 0, population), new_par(pop, f, range_pixel, 1, population), new_par(pop, f, range_rgb, 2, population), new_par(pop, f, range_rgb, 3, population), new_par(pop, f, range_rgb, 4, population)
+            value = function(model, target, img, dict, new)
+            if value == -1:
+                best_int = []
+                for i in range(0, len(new)):
+                    best_int.append(int(new[i]))
+                return best_int
+            if value < function(model, target, img, dict, pop[p]):
+                pop[p] = new
 
-    return preds[0][target]
+    best = pop[0]
+    for p in range(1, population):
+        if function(model, target, img, dict, pop[p]) < function(model, target, img, dict, best):
+            best = pop[p]
 
-#function that will be optimized for 5 pixels
-def function_net5(i1, j1, r1, g1, b1, i2, j2, r2, g2, b2, i3, j3, r3, g3, b3, i4, j4, r4, g4, b4, i5, j5, r5, g5, b5, target, model, img):
-    #print("Iteration...")
-
-    store1 = copy.deepcopy(img[0][i1][j1])
-    store2 = copy.deepcopy(img[0][i2][j2])
-    store3 = copy.deepcopy(img[0][i3][j3])
-    store4 = copy.deepcopy(img[0][i4][j4])
-    store5 = copy.deepcopy(img[0][i5][j5])
-
-    img[0][i1][j1] = r1, g1, b1
-    img[0][i2][j2] = r2, g2, b2
-    img[0][i3][j3] = r3, g3, b3
-    img[0][i4][j4] = r4, g4, b4
-    img[0][i5][j5] = r5, g5, b5
-
-    preds = model.predict(img)
-
-    img[0][i1][j1] = store1
-    img[0][i2][j2] = store2
-    img[0][i3][j3] = store3
-    img[0][i4][j4] = store4
-    img[0][i5][j5] = store5
-
-    return preds[0][target]
+    best_int = []
+    '''
+    best_int.append(int(best[0]*31))
+    best_int.append(int(best[1]*31))
+    best_int.append(int(best[2]*255))
+    best_int.append(int(best[3]*255))
+    best_int.append(int(best[4]*255))
+    '''
+    for i in range(0, len(best)):
+        best_int.append(int(best[i]))
+    return best_int
 
 #function that compute a perturbation, trying to fool the network (True if the algorithm find a solution)
 def fool_image(model, img, target, number_of_pixel, budget, show_image, dict):
@@ -125,33 +147,19 @@ def fool_image(model, img, target, number_of_pixel, budget, show_image, dict):
     #predict the class of the original image
     original_preds = model.predict(input)
 
-    #setting arguments
-    i1, j1, r1, g1, b1 = new_point()
-    i2, j2, r2, g2, b2 = new_point()
-    i3, j3, r3, g3, b3 = new_point()
-    i4, j4, r4, g4, b4 = new_point()
-    i5, j5, r5, g5, b5 = new_point()
+    iterations = 25
+    population = 100
 
-    #setting arguments for the function
-    if number_of_pixel == 1:
-        ifunc = inst.InstrumentedFunction(function_net1, i1, j1, r1, g1, b1, target, model, copy_input)
-    if number_of_pixel == 3:
-        ifunc = inst.InstrumentedFunction(function_net3, i1, j1, r1, g1, b1, i2, j2, r2, g2, b2, i3, j3, r3, g3, b3, target, model, copy_input)
-    if number_of_pixel == 5:
-        ifunc = inst.InstrumentedFunction(function_net5, i1, j1, r1, g1, b1, i2, j2, r2, g2, b2, i3, j3, r3, g3, b3, i4, j4, r4, g4, b4, i5, j5, r5, g5, b5, target, model, copy_input)
+    range_pixel = 32
+    range_rgb = 256
 
-    #asynch implementation
-    optim = optimization.registry["TwoPointsDE"](dimension=ifunc.dimension, budget=budget)
+    f = 0.5
 
-    with futures.ThreadPoolExecutor(max_workers=optim.num_workers) as executor:
-        recommendation = optim.optimize(ifunc, executor=executor)
-
-    #synch implementation (not used)
-    #optimizer = optimizerlib.TwoPointsDE(dimension=ifunc.dimension, budget=2000)
-    #recommendation = optimizer.optimize(ifunc)
+    args = differentialAlgorithm(model, target, copy_input, iterations, population, f, range_pixel, range_rgb, dict)
+    print(args)
 
     #getting results
-    args, kwargs = ifunc.data_to_arguments(recommendation, deterministic=True)
+    #args, kwargs = ifunc.data_to_arguments(recommendation, deterministic=True)
 
     #modify the original image
     index = 0
@@ -214,11 +222,10 @@ def fool_image(model, img, target, number_of_pixel, budget, show_image, dict):
 #GLOBAL DATA
 #class associated to each number
 dict = { 0:"airplane", 1:"automobile", 2:"bird", 3:"cat", 4:"deer", 5:"dog", 6:"frog", 7:"horse", 8:"ship", 9:"truck"}
-start_img_index = 2 #number of the first image used in cifar10
-end_img_index = 3 #last number (NOT incluted)
+start_img_index = 0 #number of the first image used in cifar10
+end_img_index = 10 #last number (NOT incluted)
 number_of_pixel = 1 #number of pixel that we will try to change (IT CAN BE: 1, 3, 5)
-budget = 1000 #number of iterations
-show_image = True #False = don't show the image
+show_image = False #False = don't show the image
 ###############################
 
 mispredicted_images = 0
