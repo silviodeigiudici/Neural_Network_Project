@@ -20,7 +20,7 @@ class cifar10vgg:
         if train:
             self.model = self.train(self.model)
         else:
-            self.model.load_weights('cifar10vgg.h5')
+            self.model.load_weights('./networks/vgg16/cifar10vgg.h5')
 
 
     def build_model(self):
@@ -190,6 +190,5 @@ class cifar10vgg:
                             steps_per_epoch=x_train.shape[0] // batch_size,
                             epochs=maxepoches,
                             validation_data=(x_test, y_test),callbacks=[reduce_lr],verbose=2)
-        model.save_weights('cifar10vgg.h5')
+        model.save_weights('./networks/vgg16/cifar10vgg.h5')
         return model
- 

@@ -16,7 +16,7 @@ import copy
 from random import randint
 
 #import the module implementing a neural network that we want to fool
-import neuralnet
+import networks.vgg16.vgg16_cifar10
 
 ##############################
 #SUPPORT FUNCTIONS
@@ -252,7 +252,7 @@ num_images = 10 #set the number of images to be extracted
 
 mispredicted_images = 0
 #load model
-model = neuralnet.cifar10vgg(False)
+model = networks.vgg16.vgg16_cifar10.cifar10vgg(False)
 
 #load cifar10 dataset
 (x_train, y_train), (x_test, y_test) = cifar10.load_data()
