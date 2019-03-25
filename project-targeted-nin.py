@@ -16,7 +16,7 @@ import copy
 from random import randint
 
 #import the module implementing a neural network that we want to fool
-import networks.vgg16.vgg16_cifar10
+import networks.nin.Network_in_Network_bn_keras
 
 ##############################
 #SUPPORT FUNCTIONS
@@ -254,13 +254,13 @@ number_of_pixel = 5 #number of pixel that we will try to change (IT CAN BE: 1, 3
 budget = 1500 #number of iterations
 show_image = False #False = don't show the image
 save = True #if you want to save the result
-num_images = 5 #set the number of images to be extracted
+num_images = 1 #set the number of images to be extracted
 target_class = 0
 ###############################
 
 mispredicted_images = 0
 #load model
-model = networks.vgg16.vgg16_cifar10.cifar10vgg()
+model = networks.nin.Network_in_Network_bn_keras.nin()
 
 #load cifar10 dataset
 (x_train, y_train), (x_test, y_test) = cifar10.load_data()

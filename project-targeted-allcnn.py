@@ -16,7 +16,7 @@ import copy
 from random import randint
 
 #import the module implementing a neural network that we want to fool
-import networks.vgg16.vgg16_cifar10
+import networks.allcnn.strided_all_CNN_keras
 
 ##############################
 #SUPPORT FUNCTIONS
@@ -235,6 +235,7 @@ def fool_image(model, img, img_index, target, target_class, number_of_pixel, bud
     if p_class != n_class:
         if save:
             line = str(img_index) + string + ", " + str(target_class)
+            print("line: " + line)
             file.write(line)
         return True
     else:
@@ -250,8 +251,8 @@ def fool_image(model, img, img_index, target, target_class, number_of_pixel, bud
 dict = { 0:"airplane", 1:"automobile", 2:"bird", 3:"cat", 4:"deer", 5:"dog", 6:"frog", 7:"horse", 8:"ship", 9:"truck"}
 #start_img_index = 2 #number of the first image used in cifar10
 #end_img_index = 3 #last number (NOT incluted)
-number_of_pixel = 5 #number of pixel that we will try to change (IT CAN BE: 1, 3, 5)
-budget = 1500 #number of iterations
+number_of_pixel = 1 #number of pixel that we will try to change (IT CAN BE: 1, 3, 5)
+budget = 2000 #number of iterations
 show_image = False #False = don't show the image
 save = True #if you want to save the result
 num_images = 5 #set the number of images to be extracted
@@ -260,7 +261,7 @@ target_class = 0
 
 mispredicted_images = 0
 #load model
-model = networks.vgg16.vgg16_cifar10.cifar10vgg()
+model = networks.allcnn.strided_all_CNN_keras.allcnn()
 
 #load cifar10 dataset
 (x_train, y_train), (x_test, y_test) = cifar10.load_data()
@@ -295,6 +296,6 @@ for img_index in list: #image that will be modified
         file.close()
 
 #use this function if you want to print all the images in the file Results
-print_images(x_test, "save/results_targeted.txt")
+#print_images(x_test, "save/results_targeted.txt")
 
 print("Number of mis-predicted images: " + str(mispredicted_images))

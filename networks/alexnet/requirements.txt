@@ -1,0 +1,8 @@
+h5py==2.9.0
+Keras==1.2.2
+numpy==1.16.2
+scipy==1.2.1
+tensorboard==1.12.2
+tensorflow==1.12.0
+convnetskeras==1.0.0
+Pillow==5.4.1

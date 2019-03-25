@@ -1,1 +1,6 @@
+__pycache__
+convnets-keras
 cifar10vgg.h5
+all_cnn_weights_0.9088_0.4994.hdf5
+nin_bn.h5
+alexnet_weights_imagenet.h5
