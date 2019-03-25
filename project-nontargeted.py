@@ -276,7 +276,7 @@ for img_index in list: #image that will be modified
     #y_test = keras.utils.to_categorical(y_test, 10)
 
     if save:
-        file = open("save/Results.txt", "w")
+        file = open("save/results_non-targeted.txt", "w")
 
     res = fool_image(model, img, img_index, target, number_of_pixel, budget, show_image, dict, save, file)
     print(res)

@@ -79,7 +79,7 @@ def function_net1(i1, j1, r1, g1, b1, target, model, img):
 
     img[0][i1][j1] = store1
 
-    return preds[0][target]
+    return -preds[0][target]
 
 #function that will be optimized for 3 pixels
 def function_net3(i1, j1, r1, g1, b1, i2, j2, r2, g2, b2, i3, j3, r3, g3, b3, target, model, img):
@@ -99,7 +99,7 @@ def function_net3(i1, j1, r1, g1, b1, i2, j2, r2, g2, b2, i3, j3, r3, g3, b3, ta
     img[0][i2][j2] = store2
     img[0][i3][j3] = store3
 
-    return preds[0][target]
+    return -preds[0][target]
 
 #function that will be optimized for 5 pixels
 def function_net5(i1, j1, r1, g1, b1, i2, j2, r2, g2, b2, i3, j3, r3, g3, b3, i4, j4, r4, g4, b4, i5, j5, r5, g5, b5, target, model, img):
@@ -125,10 +125,10 @@ def function_net5(i1, j1, r1, g1, b1, i2, j2, r2, g2, b2, i3, j3, r3, g3, b3, i4
     img[0][i4][j4] = store4
     img[0][i5][j5] = store5
 
-    return preds[0][target]
+    return -preds[0][target]
 
 #function that compute a perturbation, trying to fool the network (True if the algorithm find a solution)
-def fool_image(model, img, img_index, target, number_of_pixel, budget, show_image, dict, save, file):
+def fool_image(model, img, img_index, target, target_class, number_of_pixel, budget, show_image, dict, save, file):
 
     #shows the original image
     plt.imshow(img)
@@ -156,11 +156,11 @@ def fool_image(model, img, img_index, target, number_of_pixel, budget, show_imag
 
     #setting arguments for the function
     if number_of_pixel == 1:
-        ifunc = inst.InstrumentedFunction(function_net1, i1, j1, r1, g1, b1, target, model, copy_input)
+        ifunc = inst.InstrumentedFunction(function_net1, i1, j1, r1, g1, b1, target_class, model, copy_input)
     if number_of_pixel == 3:
-        ifunc = inst.InstrumentedFunction(function_net3, i1, j1, r1, g1, b1, i2, j2, r2, g2, b2, i3, j3, r3, g3, b3, target, model, copy_input)
+        ifunc = inst.InstrumentedFunction(function_net3, i1, j1, r1, g1, b1, i2, j2, r2, g2, b2, i3, j3, r3, g3, b3, target_class, model, copy_input)
     if number_of_pixel == 5:
-        ifunc = inst.InstrumentedFunction(function_net5, i1, j1, r1, g1, b1, i2, j2, r2, g2, b2, i3, j3, r3, g3, b3, i4, j4, r4, g4, b4, i5, j5, r5, g5, b5, target, model, copy_input)
+        ifunc = inst.InstrumentedFunction(function_net5, i1, j1, r1, g1, b1, i2, j2, r2, g2, b2, i3, j3, r3, g3, b3, i4, j4, r4, g4, b4, i5, j5, r5, g5, b5, target_class, model, copy_input)
 
     #asynch implementation
     optim = optimization.registry["TwoPointsDE"](dimension=ifunc.dimension, budget=budget)
@@ -202,6 +202,10 @@ def fool_image(model, img, img_index, target, number_of_pixel, budget, show_imag
     print()
     print("New prediction:")
     print(preds)
+
+    print()
+    n_class = str(dict[target_class])
+    print("Target class: " + n_class)
 
     print()
     n_class = str(dict[get_max_class(preds, dict)])
@@ -247,7 +251,8 @@ number_of_pixel = 5 #number of pixel that we will try to change (IT CAN BE: 1, 3
 budget = 1500 #number of iterations
 show_image = False #False = don't show the image
 save = True #if you want to save the result
-num_images = 10 #set the number of images to be extracted
+num_images = 1 #set the number of images to be extracted
+target_class = 1
 ###############################
 
 mispredicted_images = 0
@@ -276,9 +281,9 @@ for img_index in list: #image that will be modified
     #y_test = keras.utils.to_categorical(y_test, 10)
 
     if save:
-        file = open("save/Results.txt", "w")
+        file = open("save/results_targeted.txt", "w")
 
-    res = fool_image(model, img, img_index, target, number_of_pixel, budget, show_image, dict, save, file)
+    res = fool_image(model, img, img_index, target, target_class, number_of_pixel, budget, show_image, dict, save, file)
     print(res)
     if res == True:
         mispredicted_images += 1
