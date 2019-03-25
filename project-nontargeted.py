@@ -35,7 +35,7 @@ def get_max_class(preds, dict):
     return index_max
 
 def print_images(images, file):
-    f = open("save/Results.txt", "r")
+    f = open(file, "r")
     s = f.read()
     list = s.strip().split(",")
     img_index = int(list[0].strip())
@@ -287,6 +287,6 @@ for img_index in list: #image that will be modified
         file.close()
 
 #use this function if you want to print all the images in the file Results
-#print_images(x_test, "save/Results.txt")
+#print_images(x_test, "save/results_non-targeted.txt")
 
 print("Number of mis-predicted images: " + str(mispredicted_images))
