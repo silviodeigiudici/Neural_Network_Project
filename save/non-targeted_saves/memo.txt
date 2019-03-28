@@ -1,1 +1,3 @@
 num-of-pixel_num-of-iterations 
+
+num-of-pizel_num_of_population_num-of-iterations
