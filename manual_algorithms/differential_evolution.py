@@ -12,10 +12,11 @@ def get_random_input():
     b = float(randint(0, 255))
     return x, y, r, g, b
 
-def new_par(pop, f, limit, i_parameter, population):
+def new_par(pop, f, limit, i_parameter, population, best):
     a = pop[randint(0, population - 1)][i_parameter]
     b = pop[randint(0, population - 1)][i_parameter]
     c = pop[randint(0, population - 1)][i_parameter]
+    #return (best[i_parameter] + f*(b - c)) % limit
     return (a + f*(b - c)) % limit
 
 def differentialAlgorithm(iterations, population, f, range_pixel, range_rgb):
@@ -24,12 +25,25 @@ def differentialAlgorithm(iterations, population, f, range_pixel, range_rgb):
     for p in range(0, population):
         pop.append(get_random_input())
 
+    best_result = function(pop[0])
+    best = pop[0]
+    for i in range(1, population):
+        if function(pop[i]) < best_result:
+            best_result = function(pop[i])
+            best = pop[i]
+
     for i in range(0, iterations):
         for p in range(0, population):
             example = pop[p]
-            new = new_par(pop, f, range_pixel, 0, population), new_par(pop, f, range_pixel, 1, population), new_par(pop, f, range_rgb, 2, population), new_par(pop, f, range_rgb, 3, population), new_par(pop, f, range_rgb, 4, population)
+            new = new_par(pop, f, range_pixel, 0, population, best), new_par(pop, f, range_pixel, 1, population, best), new_par(pop, f, range_rgb, 2, population, best), new_par(pop, f, range_rgb, 3, population, best), new_par(pop, f, range_rgb, 4, population, best)
             if function(new) < function(pop[p]):
                 pop[p] = new
+        best_result = function(pop[0])
+        best = pop[0]
+        for i in range(1, population):
+            if function(pop[i]) < best_result:
+                best_result = function(pop[i])
+                best = pop[i]
 
     best = pop[0]
     for p in range(1, population):
@@ -42,8 +56,8 @@ def differentialAlgorithm(iterations, population, f, range_pixel, range_rgb):
 
     return best_int
 
-iterations = 50
-population = 200
+iterations = 10
+population = 100
 
 range_pixel = 32
 range_rgb = 256
