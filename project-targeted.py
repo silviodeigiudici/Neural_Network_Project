@@ -37,7 +37,7 @@ def get_max_class(preds, dict):
 def print_images(images, file):
     f = open(file, "r")
     s = f.read()
-    if not s: 
+    if not s:
       print("\nNo image to show\n")
     else:
       list = s.strip().split(",")
