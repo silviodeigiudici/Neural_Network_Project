@@ -1,0 +1,143 @@
+Using TensorFlow backend.
+2019-03-28 17:43:48.644912: I tensorflow/core/platform/cpu_feature_guard.cc:141] Your CPU supports instructions that this TensorFlow binary was not compiled to use: SSE4.1 SSE4.2 AVX FMA
+2019-03-28 17:43:48.692264: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1432] Found device 0 with properties: 
+name: GeForce GTX 650 major: 3 minor: 0 memoryClockRate(GHz): 1.0715
+pciBusID: 0000:01:00.0
+totalMemory: 1.95GiB freeMemory: 1.53GiB
+2019-03-28 17:43:48.692323: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1511] Adding visible gpu devices: 0
+2019-03-28 17:43:49.055008: I tensorflow/core/common_runtime/gpu/gpu_device.cc:982] Device interconnect StreamExecutor with strength 1 edge matrix:
+2019-03-28 17:43:49.055062: I tensorflow/core/common_runtime/gpu/gpu_device.cc:988]      0 
+2019-03-28 17:43:49.055072: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1001] 0:   N 
+2019-03-28 17:43:49.055288: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1115] Created TensorFlow device (/job:localhost/replica:0/task:0/device:GPU:0 with 1301 MB memory) -> physical GPU (device: 0, name: GeForce GTX 650, pci bus id: 0000:01:00.0, compute capability: 3.0)
+2019-03-28 17:43:55.805207: W tensorflow/core/common_runtime/bfc_allocator.cc:211] Allocator (GPU_0_bfc) ran out of memory trying to allocate 1.27GiB. The caller indicates that this is not a failure, but may mean that there could be performance gains if more memory were available.
+2019-03-28 17:43:56.622251: W tensorflow/core/common_runtime/bfc_allocator.cc:211] Allocator (GPU_0_bfc) ran out of memory trying to allocate 1.27GiB. The caller indicates that this is not a failure, but may mean that there could be performance gains if more memory were available.
+ 40%|███████████████████████████████▌                                               | 20/50 [00:07<00:11,  2.64it/s][2.9444809e-05 2.0202817e-05 2.1838849e-05 3.6774087e-01 2.2519951e-05
+ 6.3206559e-01 4.3876822e-05 1.3360595e-05 1.8321358e-05 2.3956205e-05]
+
+[9, 25, 172, 79, 249, 23, 13, 216, 42, 157, 29, 14, 169, 224, 147, 19, 11, 60, 227, 218, 12, 15, 249, 17, 219]
+
+Initial prediction:
+[[6.7083633e-06 1.1086385e-06 7.7962040e-06 9.9990523e-01 3.4829923e-06
+  5.8182617e-05 9.7165985e-06 1.2325438e-06 5.6352769e-06 9.2523817e-07]]
+
+Real class: cat
+
+Predicted class: cat
+
+New prediction:
+[[2.94448910e-05 2.02028550e-05 2.18389505e-05 3.67749959e-01
+  2.25199292e-05 6.32056475e-01 4.38767747e-05 1.33605945e-05
+  1.83214433e-05 2.39563651e-05]]
+
+New class: dog
+
+Modified pixels
+Pixel: (25, 9), Rgb: (172, 79, 249)
+Pixel: (13, 23), Rgb: (216, 42, 157)
+Pixel: (14, 29), Rgb: (169, 224, 147)
+Pixel: (11, 19), Rgb: (60, 227, 218)
+Pixel: (15, 12), Rgb: (249, 17, 219)
+True
+  0%|                                                                                        | 0/50 [00:00<?, ?it/s][1.9526788e-03 7.2517967e-01 2.4285193e-05 9.8894248e-05 8.9385394e-06
+ 3.8873673e-05 1.3337998e-05 1.2798850e-05 2.7252081e-01 1.4973927e-04]
+
+[18, 7, 232, 28, 120, 5, 30, 111, 77, 254, 16, 17, 183, 2, 131, 31, 18, 145, 144, 88, 20, 15, 231, 15, 84]
+
+Initial prediction:
+[[3.7644499e-05 2.1951301e-04 4.4118483e-06 1.8643308e-05 1.3935501e-06
+  1.8353394e-05 3.6485137e-06 3.4357934e-06 9.9967766e-01 1.5282614e-05]]
+
+Real class: ship
+
+Predicted class: ship
+
+New prediction:
+[[1.9526882e-03 7.2518212e-01 2.4285180e-05 9.8894110e-05 8.9385449e-06
+  3.8873732e-05 1.3338043e-05 1.2798858e-05 2.7251834e-01 1.4973950e-04]]
+
+New class: automobile
+
+Modified pixels
+Pixel: (7, 18), Rgb: (232, 28, 120)
+Pixel: (30, 5), Rgb: (111, 77, 254)
+Pixel: (17, 16), Rgb: (183, 2, 131)
+Pixel: (18, 31), Rgb: (145, 144, 88)
+Pixel: (15, 20), Rgb: (231, 15, 84)
+True
+  0%|                                                                                        | 0/50 [00:00<?, ?it/s][1.98318101e-02 7.96860456e-01 1.16793475e-04 1.69803461e-05
+ 2.00888244e-05 4.33623245e-05 2.00136546e-05 7.05754210e-05
+ 1.82397857e-01 6.22078311e-04]
+
+[24, 16, 244, 25, 68, 4, 26, 232, 226, 250, 2, 31, 150, 165, 252, 17, 2, 173, 123, 87, 18, 15, 5, 3, 172]
+
+Initial prediction:
+[[9.7198892e-05 1.4107400e-03 4.4737229e-05 9.1980382e-06 6.5439312e-06
+  3.5625679e-05 2.0830215e-05 4.4257788e-05 9.9828786e-01 4.2960681e-05]]
+
+Real class: ship
+
+Predicted class: ship
+
+New prediction:
+[[1.9831501e-02 7.9686302e-01 1.1679240e-04 1.6980304e-05 2.0088641e-05
+  4.3361804e-05 2.0013566e-05 7.0574715e-05 1.8239558e-01 6.2207144e-04]]
+
+New class: automobile
+
+Modified pixels
+Pixel: (16, 24), Rgb: (244, 25, 68)
+Pixel: (26, 4), Rgb: (232, 226, 250)
+Pixel: (31, 2), Rgb: (150, 165, 252)
+Pixel: (2, 17), Rgb: (173, 123, 87)
+Pixel: (15, 18), Rgb: (5, 3, 172)
+True
+ 82%|████████████████████████████████████████████████████████████████▊              | 41/50 [00:15<00:03,  2.65it/s][4.5015889e-01 4.0646322e-05 1.4365024e-04 1.3004069e-04 2.0077416e-05
+ 1.0801987e-05 7.4861864e-06 1.6584986e-06 5.4945093e-01 3.5842211e-05]
+[16, 22, 195, 20, 119, 16, 27, 162, 57, 98, 24, 4, 253, 99, 25, 12, 21, 15, 67, 89, 18, 30, 164, 115, 196]
+
+Initial prediction:
+[[9.9977666e-01 3.1964328e-06 4.9700026e-05 8.8517190e-05 1.5377069e-05
+  8.0863083e-06 1.9419285e-06 7.7433396e-07 4.3630374e-05 1.2020160e-05]]
+
+Real class: airplane
+
+Predicted class: airplane
+
+New prediction:
+[[4.5015863e-01 4.0646377e-05 1.4364989e-04 1.3004061e-04 2.0077483e-05
+  1.0802003e-05 7.4862119e-06 1.6584945e-06 5.4945117e-01 3.5842128e-05]]
+
+New class: ship
+
+Modified pixels
+Pixel: (22, 16), Rgb: (195, 20, 119)
+Pixel: (27, 16), Rgb: (162, 57, 98)
+Pixel: (4, 24), Rgb: (253, 99, 25)
+Pixel: (21, 12), Rgb: (15, 67, 89)
+Pixel: (30, 18), Rgb: (164, 115, 196)
+True
+                                                                                                                   [5, 7, 249, 38, 11, 10, 7, 246, 31, 49, 20, 2, 135, 141, 228, 13, 6, 200, 5, 93, 15, 7, 123, 77, 237]0:00,  2.65it/s]
+
+Initial prediction:
+[[2.9024920e-06 8.1309681e-06 3.3511071e-05 9.1060438e-06 1.4835651e-06
+  7.8738931e-06 9.9992752e-01 2.8638333e-06 4.1969151e-06 2.3171733e-06]]
+
+Real class: frog
+
+Predicted class: frog
+
+New prediction:
+[[5.5527366e-06 1.7457880e-05 1.0307765e-03 2.4072053e-05 1.4940799e-06
+  8.3494397e-06 9.9890149e-01 4.4769399e-06 2.7230542e-06 3.4106936e-06]]
+
+New class: frog
+
+Modified pixels
+Pixel: (7, 5), Rgb: (249, 38, 11)
+Pixel: (7, 10), Rgb: (246, 31, 49)
+Pixel: (2, 20), Rgb: (135, 141, 228)
+Pixel: (6, 13), Rgb: (200, 5, 93)
+Pixel: (7, 15), Rgb: (123, 77, 237)
+False
+Number of mis-predicted images: 4
+ 
