@@ -312,11 +312,21 @@ population = 150
 range_pixel = 32
 range_rgb = 256
 F = 0.5
+neuralnetwork = 0 #0 for vgg16, 1 for nin, 2 for allcnn
 ###############################
 
 mispredicted_images = 0
+
 #load model
-model = networks.vgg16.vgg16_cifar10.cifar10vgg()
+if neuralnetwork == 0:
+    import networks.vgg16.vgg16_cifar10
+    model = networks.vgg16.vgg16_cifar10.cifar10vgg()
+elif neuralnetwork == 1:
+    import networks.nin.Network_in_Network_bn_keras
+    model = networks.nin.Network_in_Network_bn_keras.nin()
+elif neuralnetwork == 2:
+    import networks.allcnn.strided_all_CNN_keras
+    model = networks.allcnn.strided_all_CNN_keras.allcnn()
 
 #load cifar10 dataset
 (x_train, y_train), (x_test, y_test) = cifar10.load_data()
