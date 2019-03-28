@@ -4,13 +4,6 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 
-#nevergrad
-from nevergrad import instrumentation as inst
-from nevergrad.optimization import optimizerlib
-import nevergrad.optimization as optimization
-
-from concurrent import futures
-
 import copy
 
 from random import randint

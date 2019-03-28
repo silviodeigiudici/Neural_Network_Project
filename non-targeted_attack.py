@@ -4,22 +4,12 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 
-#nevergrad
-from nevergrad import instrumentation as inst
-from nevergrad.optimization import optimizerlib
-import nevergrad.optimization as optimization
-
-from concurrent import futures
-
 import copy
 
 from random import randint
 import random
 
 from tqdm import tqdm
-
-#import the module implementing a neural network that we want to fool
-import networks.vgg16.vgg16_cifar10
 
 ##############################
 #SUPPORT FUNCTIONS
