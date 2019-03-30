@@ -295,7 +295,7 @@ def fool_image(model, img, img_index, target, number_of_pixel, show_image, dict,
 #GLOBAL DATA
 #class associated to each number
 dict = { 0:"airplane", 1:"automobile", 2:"bird", 3:"cat", 4:"deer", 5:"dog", 6:"frog", 7:"horse", 8:"ship", 9:"truck"}
-start_img_index = 1 #number of the first image used in cifar10
+start_img_index = 2 #number of the first image used in cifar10
 end_img_index = 3 #last number (NOT incluted)
 number_of_pixel = 5 #number of pixel that we will try to change
 show_image = False #False = don't show the image
