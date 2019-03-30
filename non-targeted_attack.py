@@ -16,7 +16,7 @@ from tqdm import tqdm
 #############################
 
 #function that return the class with higher value in preds
-def get_max_class(preds, dict):
+def get_max_class(preds):
     index = 0
     max = 0
     index_max = 0
@@ -27,7 +27,7 @@ def get_max_class(preds, dict):
         index += 1
     return index_max
 
-def get_max_class_new(preds, dict):
+def get_max_class_new(preds):
     index = 0
     max = 0
     index_max = 0
@@ -173,27 +173,27 @@ def differentialAlgorithm(model, target, img, iterations, num_population, F, ran
 
     iterations_indeces = range(0, iterations)
     for i in tqdm(iterations_indeces):
-        old_pixel_store = []
+        #old_pixel_store = []
         population_indeces = range(0, num_population)
         for p in population_indeces:
             new = new_son(population, F, range_pixel, range_rgb, num_population, best, number_of_pixel)
 
-            #set_image(matrix, p, new)
-            store = set_image(matrix, p, new, number_of_pixel)
-            old_pixel_store.append(store)
+            set_image(matrix, p, new, number_of_pixel)
+            #store = set_image(matrix, p, new, number_of_pixel)
+            #old_pixel_store.append(store)
 
             new_population[p] = new
 
         value = model.predict(matrix)
 
-        #matrix = new_matrix(img, num_population)
-        unset_images(old_pixel_store, matrix, num_population, new_population, number_of_pixel)
+        matrix = new_matrix(img, num_population)
+        #unset_images(old_pixel_store, matrix, num_population, new_population, number_of_pixel)
 
         for p in population_indeces:
             if value[p][target] < old_value[p][target]:
                 population[p] = new_population[p]
                 old_value[p] = value[p]
-                if get_max_class_new(old_value[p], dict) != target:
+                if get_max_class_new(old_value[p]) != target:
                     print(old_value[p])
                     return trasform_to_int(population[p])
 
@@ -220,6 +220,10 @@ def fool_image(model, img, img_index, target, number_of_pixel, show_image, dict,
 
     #predict the class of the original image
     original_preds = model.predict(input)
+    if get_max_class(original_preds) != target:
+        print()
+        print("Network mispredict!")
+        return True
 
     args = differentialAlgorithm(model, target, copy_input, iterations, population, F, range_pixel, range_rgb, dict, number_of_pixel)
     print(args)
@@ -245,7 +249,7 @@ def fool_image(model, img, img_index, target, number_of_pixel, show_image, dict,
     print("Real class: " + str(dict[target]))
 
     print()
-    p_class = str(dict[get_max_class(original_preds, dict)])
+    p_class = str(dict[get_max_class(original_preds)])
     print("Predicted class: " + p_class)
 
     print()
@@ -253,7 +257,7 @@ def fool_image(model, img, img_index, target, number_of_pixel, show_image, dict,
     print(preds)
 
     print()
-    n_class = str(dict[get_max_class(preds, dict)])
+    n_class = str(dict[get_max_class(preds)])
     print("New class: " + n_class)
 
     #shows the modified image
