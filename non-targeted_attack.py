@@ -46,7 +46,7 @@ def print_images(images, file):
     for image in images_string:
         list = image.strip().split(",")
         img_index = int(list[0].strip())
-        number_of_pixel = int((len(list) - 1)/5)
+        number_of_pixel = int((len(list) - 2)/5)
         index = 1
         image = images[img_index]
         plt.imshow(image)
@@ -172,7 +172,7 @@ def differentialAlgorithm(model, target, img, iterations, num_population, F, ran
     matrix = new_matrix(img, num_population)
 
     iterations_indeces = range(0, iterations)
-    for i in tqdm(iterations_indeces):
+    for iterations_done in tqdm(iterations_indeces):
         #old_pixel_store = []
         population_indeces = range(0, num_population)
         for p in population_indeces:
@@ -195,11 +195,11 @@ def differentialAlgorithm(model, target, img, iterations, num_population, F, ran
                 old_value[p] = value[p]
                 if get_max_class_new(old_value[p]) != target:
                     print(old_value[p])
-                    return trasform_to_int(population[p])
+                    return trasform_to_int(population[p]), iterations_done
 
         best = get_best_individual(old_value, population, num_population)
 
-    return trasform_to_int(best)
+    return trasform_to_int(best), iterations_done
 
 #function that compute a perturbation, trying to fool the network (True if the algorithm find a solution)
 def fool_image(model, img, img_index, target, number_of_pixel, show_image, dict, save, file, iterations, population, F, range_pixel, range_rgb):
@@ -221,11 +221,10 @@ def fool_image(model, img, img_index, target, number_of_pixel, show_image, dict,
     #predict the class of the original image
     original_preds = model.predict(input)
     if get_max_class(original_preds) != target:
-        print()
-        print("Network mispredict!")
+        print("\nNetwork mispredict!")
         return True
 
-    args = differentialAlgorithm(model, target, copy_input, iterations, population, F, range_pixel, range_rgb, dict, number_of_pixel)
+    args, iterations_done = differentialAlgorithm(model, target, copy_input, iterations, population, F, range_pixel, range_rgb, dict, number_of_pixel)
     print(args)
 
     #modify the original image
@@ -241,32 +240,26 @@ def fool_image(model, img, img_index, target, number_of_pixel, show_image, dict,
     preds = model.predict(input)
 
     #print value returned by the network
-    print()
-    print("Initial prediction:")
+    print("\nInitial prediction:")
     print(original_preds)
 
-    print()
-    print("Real class: " + str(dict[target]))
+    print("\nReal class: " + str(dict[target]))
 
-    print()
     p_class = str(dict[get_max_class(original_preds)])
-    print("Predicted class: " + p_class)
+    print("\nPredicted class: " + p_class)
 
-    print()
-    print("New prediction:")
+    print("\nNew prediction:")
     print(preds)
 
-    print()
     n_class = str(dict[get_max_class(preds)])
-    print("New class: " + n_class)
+    print("\nNew class: " + n_class)
 
     #shows the modified image
     img = input.astype('uint8')
     plt.imshow(img[0])
 
     #print values modified
-    print()
-    print("Modified pixels")
+    print("\nModified pixels")
     index = 0
     string = ""
     for k in range(0, number_of_pixel):
@@ -274,17 +267,19 @@ def fool_image(model, img, img_index, target, number_of_pixel, show_image, dict,
         print("Pixel: (" + str(args[index + 1]) + ", " + str(args[index]) + ")", end=", ")
         print("Rgb: (" + str(args[index + 2]) + ", " + str(args[index + 3]) + ", " + str(args[index + 4]) + ")")
         index += 5
-    string += "\n"
 
     if show_image:
         plt.show()
 
     if p_class != n_class:
         if save:
-            line = str(img_index) + string
+            line = str(img_index) + string + ", Success " + p_class + " " + n_class + " " + str(iterations_done) + "\n"
             file.write(line)
         return True
     else:
+        if save:
+            line = str(img_index) + string + ", Fail " + p_class + "\n"
+            file.write(line)
         return False
 
 ##############################################################################
@@ -295,8 +290,8 @@ def fool_image(model, img, img_index, target, number_of_pixel, show_image, dict,
 #GLOBAL DATA
 #class associated to each number
 dict = { 0:"airplane", 1:"automobile", 2:"bird", 3:"cat", 4:"deer", 5:"dog", 6:"frog", 7:"horse", 8:"ship", 9:"truck"}
-start_img_index = 2 #number of the first image used in cifar10
-end_img_index = 3 #last number (NOT incluted)
+start_img_index = 1 #number of the first image used in cifar10
+end_img_index = 5 #last number (NOT incluted)
 number_of_pixel = 5 #number of pixel that we will try to change
 show_image = False #False = don't show the image
 save = True #if you want to save the result
@@ -349,7 +344,6 @@ for img_index in list: #image that will be modified
 
     #y_train = keras.utils.to_categorical(y_train, 10) #trasform the class into an array (0 .. 1 ... 0)
     #y_test = keras.utils.to_categorical(y_test, 10)
-
     res = fool_image(model, img, img_index, target, number_of_pixel, show_image, dict, save, file, iterations, population, F, range_pixel, range_rgb)
     print(res)
     if res == True:
