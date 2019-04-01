@@ -1,10 +1,10 @@
 from keras.datasets import cifar10
 
 import numpy as np
-
 import matplotlib.pyplot as plt
 
 import copy
+import time
 
 from random import randint
 import random
@@ -277,12 +277,12 @@ def fool_image(model, img, img_index, target, target_class, number_of_pixel, sho
 
     if p_class == n_class:
         if save:
-            line = str(img_index) + string + ", Success " + p_class + " " + dict[target_class] + " " + str(iterations_done) + "\n"
+            line = str(img_index) + string + ", Success " + n_class + " " + dict[target_class] + " " + str(iterations_done) + "\n"
             file.write(line)
         return True
     else:
         if save:
-            line = str(img_index) + string + ", Fail " + p_class + " " + dict[target_class] + "\n"
+            line = str(img_index) + string + ", Fail " + n_class + " " + dict[target_class] + "\n"
             file.write(line)
         return False
 
@@ -305,7 +305,7 @@ population = 150
 range_pixel = 32
 range_rgb = 256
 F = 0.5
-#target_class = 0
+dict_nn = {0: "vgg16",1: "NiN",2: "allcnn"}
 neuralnetwork = 0 #0 for vgg16, 1 for nin, 2 for allcnn
 ###############################
 
@@ -339,7 +339,7 @@ for i in range(0, num_images):
 '''
 
 if save:
-    file = open("save/results_targeted.txt", "w")
+    file = open("save/targeted_saves/results_%d_" % time.time() +str(number_of_pixel)+"_"+dict_nn[neuralnetwork]+".txt", "w")
 
 for img_index in list: #image that will be modified
 
