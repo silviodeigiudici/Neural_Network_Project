@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import copy
+import time
 
 from random import randint
 import random
@@ -273,12 +274,12 @@ def fool_image(model, img, img_index, target, number_of_pixel, show_image, dict,
 
     if p_class != n_class:
         if save:
-            line = str(img_index) + string + ", Success " + p_class + " " + n_class + " " + str(iterations_done) + "\n"
+            line = str(img_index) + string + ", Success " + n_class + " " + str(iterations_done) + "\n"
             file.write(line)
         return True
     else:
         if save:
-            line = str(img_index) + string + ", Fail " + p_class + "\n"
+            line = str(img_index) + string + ", Fail " + n_class + "\n"
             file.write(line)
         return False
 
@@ -291,7 +292,7 @@ def fool_image(model, img, img_index, target, number_of_pixel, show_image, dict,
 #class associated to each number
 dict = { 0:"airplane", 1:"automobile", 2:"bird", 3:"cat", 4:"deer", 5:"dog", 6:"frog", 7:"horse", 8:"ship", 9:"truck"}
 start_img_index = 1 #number of the first image used in cifar10
-end_img_index = 5 #last number (NOT incluted)
+end_img_index = 3 #last number (NOT incluted)
 number_of_pixel = 5 #number of pixel that we will try to change
 show_image = False #False = don't show the image
 save = True #if you want to save the result
@@ -301,6 +302,7 @@ population = 150
 range_pixel = 32
 range_rgb = 256
 F = 0.5
+dict_nn = {0: "vgg16",1: "NiN",2: "allcnn"}
 neuralnetwork = 0 #0 for vgg16, 1 for nin, 2 for allcnn
 ###############################
 
@@ -334,7 +336,7 @@ for i in range(0, num_images):
 '''
 
 if save:
-    file = open("save/results_non-targeted.txt", "w")
+    file = open("save/non-targeted_saves/results_%d_" % time.time() +str(number_of_pixel)+"_"+dict_nn[neuralnetwork]+".txt", "w")
 
 for img_index in list: #image that will be modified
 
