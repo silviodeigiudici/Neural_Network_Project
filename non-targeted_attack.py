@@ -274,12 +274,12 @@ def fool_image(model, img, img_index, target, number_of_pixel, show_image, dict,
 
     if p_class != n_class:
         if save:
-            line = str(img_index) + string + ", Success " + n_class + " " + str(iterations_done) + "\n"
+            line = str(img_index) + string + ",Success " + n_class + " " + str(iterations_done) + "\n"
             file.write(line)
         return True
     else:
         if save:
-            line = str(img_index) + string + ", Fail " + n_class + "\n"
+            line = str(img_index) + string + ",Fail " + n_class + "\n"
             file.write(line)
         return False
 
