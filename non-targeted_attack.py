@@ -45,17 +45,17 @@ def print_images(images, file):
     f.close()
     images_string = s.strip().split("\n")
     for image in images_string:
-        list = image.strip().split(",")
-        img_index = int(list[0].strip())
-        number_of_pixel = int((len(list) - 2)/5)
+        list_par = image.strip().split(",")
+        img_index = int(list_par[0].strip())
+        number_of_pixel = int((len(list_par) - 2)/5)
         index = 1
         image = images[img_index]
         plt.imshow(image)
         plt.show()
         for i in range(0, number_of_pixel):
-            row = int(list[index])
-            col = int(list[index + 1])
-            rgb = int(list[index + 2]), int(list[index + 3]), int(list[index + 4])
+            row = int(list_par[index])
+            col = int(list_par[index + 1])
+            rgb = int(list_par[index + 2]), int(list_par[index + 3]), int(list_par[index + 4])
             image[row][col] = rgb
             index += 5
         plt.imshow(image)
@@ -80,9 +80,17 @@ def get_random_input(number_of_pixel):
         perturbations += get_random_perturbation()
     return perturbations
 
-def new_par(population, F, limit, i_parameter, num_population, best):
-    a = population[randint(0, num_population - 1)][i_parameter]
-    b = population[randint(0, num_population - 1)][i_parameter]
+def new_par(population, F, limit, i_parameter, num_population, best, individual_index, crossover, j, example):
+
+    if random.uniform(0, 1) > crossover and i_parameter != j:
+        return example[i_parameter]
+
+    random_list_0 = list(range(0, individual_index))
+    random_list_1 = list(range(individual_index + 1, num_population))
+    random_list = random_list_0 + random_list_1
+    i_a, i_b = random.sample(random_list, 2)
+    a = population[i_a][i_parameter]
+    b = population[i_b][i_parameter]
     return (best[i_parameter] + F*(a - b)) % limit
 
 def set_image(matrix, p, input, number_of_pixel):
@@ -119,29 +127,31 @@ def new_matrix(img, num_population):
         matrix[p] = copy.deepcopy(img[0])
     return matrix
 
-def new_son(population, F, range_pixel, range_rgb, num_population, best, number_of_pixel):
+def new_son(population, F, range_pixel, range_rgb, num_population, best, number_of_pixel, individual_index, crossover, j, example):
     indeces = range(0, number_of_pixel)
     index = 0
     perturbations = ()
     for i_pixel in indeces:
-        row = new_par(population, F, range_pixel, index, num_population, best)
-        col = new_par(population, F, range_pixel, index + 1, num_population, best)
-        r = new_par(population, F, range_rgb, index + 2, num_population, best)
-        g = new_par(population, F, range_rgb, index + 3, num_population, best)
-        b = new_par(population, F, range_rgb, index + 4, num_population, best)
+        row = new_par(population, F, range_pixel, index, num_population, best, individual_index, crossover, j, example)
+        col = new_par(population, F, range_pixel, index + 1, num_population, best, individual_index, crossover, j, example)
+        r = new_par(population, F, range_rgb, index + 2, num_population, best, individual_index, crossover, j, example)
+        g = new_par(population, F, range_rgb, index + 3, num_population, best, individual_index, crossover, j, example)
+        b = new_par(population, F, range_rgb, index + 4, num_population, best, individual_index, crossover, j, example)
         perturbations += row, col, r, g, b
         index += 5
     return perturbations
 
-def get_best_individual(old_value, pop, num_population):
+def get_best_individual(old_value, pop, num_population, target):
     best_value = old_value[0]
     best = pop[0]
+    best_index = 0
     population_indeces = range(1, num_population)
     for i in population_indeces:
         if old_value[i][target] < best_value[target]:
             best_value = old_value[i]
             best = pop[i]
-    return best
+            best_index = i
+    return best, best_index
 
 def trasform_to_int(solution):
     best_int = []
@@ -162,13 +172,13 @@ def create_population(img, num_population, number_of_pixel):
         new_population.append(rand)
     return population, new_population, matrix
 
-def differentialAlgorithm(model, target, img, iterations, num_population, F, range_pixel, range_rgb, dict, number_of_pixel):
+def differentialAlgorithm(model, target, img, iterations, num_population, F, range_pixel, range_rgb, dict, number_of_pixel, crossover, decrese_crossover):
 
     population, new_population, matrix = create_population(img, num_population, number_of_pixel)
 
     old_value = model.predict(matrix)
 
-    best = get_best_individual(old_value, population, num_population)
+    best, best_index = get_best_individual(old_value, population, num_population, target)
 
     matrix = new_matrix(img, num_population)
 
@@ -177,7 +187,9 @@ def differentialAlgorithm(model, target, img, iterations, num_population, F, ran
         #old_pixel_store = []
         population_indeces = range(0, num_population)
         for p in population_indeces:
-            new = new_son(population, F, range_pixel, range_rgb, num_population, best, number_of_pixel)
+            j = randint(0, 5*number_of_pixel)
+
+            new = new_son(population, F, range_pixel, range_rgb, num_population, best, number_of_pixel, p, crossover, j, population[p])
 
             set_image(matrix, p, new, number_of_pixel)
             #store = set_image(matrix, p, new, number_of_pixel)
@@ -190,6 +202,8 @@ def differentialAlgorithm(model, target, img, iterations, num_population, F, ran
         matrix = new_matrix(img, num_population)
         #unset_images(old_pixel_store, matrix, num_population, new_population, number_of_pixel)
 
+        old_best_value = old_value[best_index][target]
+
         for p in population_indeces:
             if value[p][target] < old_value[p][target]:
                 population[p] = new_population[p]
@@ -198,12 +212,18 @@ def differentialAlgorithm(model, target, img, iterations, num_population, F, ran
                     print(old_value[p])
                     return trasform_to_int(population[p]), iterations_done
 
-        best = get_best_individual(old_value, population, num_population)
+        best, best_index = get_best_individual(old_value, population, num_population, target)
+
+        if old_best_value != old_value[best_index][target]:
+            print("New Best!")
+            print(old_value[best_index][target])
+
+        crossover -= decrese_crossover
 
     return trasform_to_int(best), iterations_done
 
 #function that compute a perturbation, trying to fool the network (True if the algorithm find a solution)
-def fool_image(model, img, img_index, target, number_of_pixel, show_image, dict, save, file, iterations, population, F, range_pixel, range_rgb):
+def fool_image(model, img, img_index, target, number_of_pixel, show_image, dict, save, file, iterations, population, F, range_pixel, range_rgb, crossover, decrese_crossover):
 
     #shows the original image
     plt.imshow(img)
@@ -225,7 +245,7 @@ def fool_image(model, img, img_index, target, number_of_pixel, show_image, dict,
         print("\nNetwork mispredict!")
         return True
 
-    args, iterations_done = differentialAlgorithm(model, target, copy_input, iterations, population, F, range_pixel, range_rgb, dict, number_of_pixel)
+    args, iterations_done = differentialAlgorithm(model, target, copy_input, iterations, population, F, range_pixel, range_rgb, dict, number_of_pixel, crossover, decrese_crossover)
     print(args)
 
     #modify the original image
@@ -293,12 +313,14 @@ def fool_image(model, img, img_index, target, number_of_pixel, show_image, dict,
 dict = { 0:"airplane", 1:"automobile", 2:"bird", 3:"cat", 4:"deer", 5:"dog", 6:"frog", 7:"horse", 8:"ship", 9:"truck"}
 start_img_index = 1 #number of the first image used in cifar10
 end_img_index = 3 #last number (NOT incluted)
-number_of_pixel = 5 #number of pixel that we will try to change
+number_of_pixel = 1 #number of pixel that we will try to change
 show_image = False #False = don't show the image
 save = True #if you want to save the result
 num_images = 1 #set the number of images to be extracted
 iterations = 50
 population = 150
+crossover = 0.7
+decrese_crossover = 0 # 0.5/iterations
 range_pixel = 32
 range_rgb = 256
 F = 0.5
@@ -325,20 +347,20 @@ elif neuralnetwork == 2:
 #use this function if you want to print all the images in the file Results
 #print_images(x_test, "save/results_non-targeted.txt")
 
-list = range(start_img_index, end_img_index) #USELESS if you use the random selection:
+images_list = range(start_img_index, end_img_index) #USELESS if you use the random selection:
 
 '''
 #random images
-list = []
+images_list = []
 max = len(x_test)
 for i in range(0, num_images):
-    list.append(randint(0, max))
+    images_list.append(randint(0, max))
 '''
 
 if save:
     file = open("save/non-targeted_saves/results_%d_" % time.time() +str(number_of_pixel)+"_"+dict_nn[neuralnetwork]+".txt", "w")
 
-for img_index in list: #image that will be modified
+for img_index in images_list: #image that will be modified
 
     img = x_test[img_index]
 
@@ -346,7 +368,8 @@ for img_index in list: #image that will be modified
 
     #y_train = keras.utils.to_categorical(y_train, 10) #trasform the class into an array (0 .. 1 ... 0)
     #y_test = keras.utils.to_categorical(y_test, 10)
-    res = fool_image(model, img, img_index, target, number_of_pixel, show_image, dict, save, file, iterations, population, F, range_pixel, range_rgb)
+    res = fool_image(model, img, img_index, target, number_of_pixel, show_image, dict, save, file, \
+                    iterations, population, F, range_pixel, range_rgb, crossover, decrese_crossover)
     print(res)
     if res == True:
         mispredicted_images += 1
