@@ -346,7 +346,7 @@ if save:
     file = open("save/results_targeted.txt", "w")
 
 for img_index in list: #image that will be modified
-
+    print(type(x_test))
     img = x_test[img_index]
 
     target = y_test[img_index][0]
