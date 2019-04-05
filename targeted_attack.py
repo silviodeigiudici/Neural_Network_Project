@@ -319,10 +319,10 @@ end_img_index = 3 #last number (NOT incluted)
 number_of_pixel = 5 #number of pixel that we will try to change
 show_image = False #False = don't show the image
 save = True #if you want to save the result
-num_images = 1 #set the number of images to be extracted
-iterations = 50
-population = 150
-crossover = 0.7
+num_images = 200 #set the number of images to be extracted
+iterations = 100
+population = 400
+crossover = 1
 decrese_crossover = 0 # 0.5/iterations
 range_pixel = 32
 range_rgb = 256
@@ -352,24 +352,19 @@ elif neuralnetwork == 2:
 
 images_list = range(start_img_index, end_img_index) #USELESS if you use the random selection:
 
-'''
+
 #random images
 images_list = []
 max = len(x_test)
 for i in range(0, num_images):
     images_list.append(randint(0, max))
-'''
+
 
 if save:
     file = open("save/targeted_saves/results_%d_" % time.time() +str(number_of_pixel)+"_"+dict_nn[neuralnetwork]+".txt", "w")
 
-<<<<<<< HEAD
-for img_index in list: #image that will be modified
-    print(type(x_test))
-=======
 for img_index in images_list: #image that will be modified
 
->>>>>>> d62c0beb98cc0e9e5285d5a830da505dca6de1cc
     img = x_test[img_index]
 
     target = y_test[img_index][0]

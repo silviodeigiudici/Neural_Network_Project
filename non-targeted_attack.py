@@ -313,13 +313,13 @@ def fool_image(model, img, img_index, target, number_of_pixel, show_image, dict,
 dict = { 0:"airplane", 1:"automobile", 2:"bird", 3:"cat", 4:"deer", 5:"dog", 6:"frog", 7:"horse", 8:"ship", 9:"truck"}
 start_img_index = 1 #number of the first image used in cifar10
 end_img_index = 3 #last number (NOT incluted)
-number_of_pixel = 1 #number of pixel that we will try to change
+number_of_pixel = 5 #number of pixel that we will try to change
 show_image = False #False = don't show the image
 save = True #if you want to save the result
-num_images = 1 #set the number of images to be extracted
-iterations = 50
-population = 150
-crossover = 0.7
+num_images = 200 #set the number of images to be extracted
+iterations = 100
+population = 400
+crossover = 1
 decrese_crossover = 0 # 0.5/iterations
 range_pixel = 32
 range_rgb = 256
@@ -349,13 +349,13 @@ elif neuralnetwork == 2:
 
 images_list = range(start_img_index, end_img_index) #USELESS if you use the random selection:
 
-'''
+
 #random images
 images_list = []
 max = len(x_test)
 for i in range(0, num_images):
     images_list.append(randint(0, max))
-'''
+
 
 if save:
     file = open("save/non-targeted_saves/results_%d_" % time.time() +str(number_of_pixel)+"_"+dict_nn[neuralnetwork]+".txt", "w")
