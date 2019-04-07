@@ -20,6 +20,6 @@ def main():
     print("Network label result: "+ str(images_imagenet.getLabelByClass(netClass)))
     print("Real class: " + str(img_clas))
     print("Real label: " + str(images_imagenet.getLabelByClass(img_clas)))
-  
+
 if __name__== "__main__":
     main()

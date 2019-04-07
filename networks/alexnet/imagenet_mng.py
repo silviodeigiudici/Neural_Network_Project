@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 import sys
 sys.path.append('../../convnets-keras/')
-from convnetskeras.convnets import preprocess_image_batch
+#sys.path.append('convnets-keras/') #added in order to work with non-targeted
+from convnetskeras.convnets import preprocess_image_batch, preprocess_in_values
 from tqdm import tqdm
 import os
 import numpy as np
@@ -21,7 +22,7 @@ class manager_imagenet():
         self._getLabelsImagesFromFile()
         if self.cache:
             self._getFullListImagesFromDirectory()
-    
+
     def _getLabelsImagesFromFile(self):
         fd = open(self.pathLabels, "r")
         for elem in fd:
@@ -32,7 +33,7 @@ class manager_imagenet():
                 self.dictLabels[clas] = label
         fd.close()
         return
-    
+
     def _getFullListImagesFromDirectory(self):
         i = 0
         list_path = []
@@ -44,7 +45,7 @@ class manager_imagenet():
             i+=1
             list_path.clear()
         return None
-    
+
     def _readImageFormDirectoryNoCache(self, num):
         list_path = []
         elem = self.listDirs[num]
@@ -53,10 +54,10 @@ class manager_imagenet():
         self.listImgsClassLabel[num] = img
         self.dictOfImages[num] = elem
         return img
-    
+
     def _validNum(self, num):
         return num >= 0 and num < len(self.listDirs)
-    
+
     def getImgByNum(self, num):
         if self._validNum(num):
             if self.cache:
@@ -66,7 +67,10 @@ class manager_imagenet():
         else:
             print("Error: the parameter 'number' is out bound of range: [0 ... 1000]")
             return None
-    
+
+    def preprocessing(self, imgs, num_images):
+        preprocess_in_values(imgs, num_images) #side effect!!
+
     def getClassByNum(self, num):
         if self._validNum(num):
             if self.cache or (num in list(self.dictOfImages.keys())) :
@@ -77,14 +81,14 @@ class manager_imagenet():
         else:
             print("Error: the parameter 'number' is out bound of range: [0 ... 1000]")
             return None
-    
+
     def getLabelByClass(self, cls):
         if self.dictLabels[cls]:
             return self.dictLabels[cls]
         else:
             print("Error: no image of this class has been read")
             return None
-    
+
     def clear():
         self.dictOfImages.clear()
         self.listImgsClassLabel.clear()

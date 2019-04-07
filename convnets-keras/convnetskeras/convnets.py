@@ -285,6 +285,13 @@ def AlexNet(weights_path=None, heatmap=False):
 
     return model
 
+def preprocess_in_values(imgs, num_images): #side effect!!
+    #img = img.astype('float32')
+    indeces = range(0, num_images)
+    for i_img in indeces:
+        imgs[i_img][0, :, :] -= 123.68
+        imgs[i_img][1, :, :] -= 116.779
+        imgs[i_img][2, :, :] -= 103.939
 
 def preprocess_image_batch(image_paths, img_size=None, crop_size=None, color_mode='rgb', out=None):
     """

@@ -64,7 +64,7 @@ class allcnn(Sequential):
         model.add(GlobalAveragePooling2D())
         model.add(Activation('softmax'))
         return model
-      
+
     def predict(self,x):
         # normalize the images
         x = x.astype('float32')
