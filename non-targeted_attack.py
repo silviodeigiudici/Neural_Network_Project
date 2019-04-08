@@ -214,9 +214,9 @@ def differentialAlgorithm(model, target, img, iterations, num_population, F, ran
 
         best, best_index = get_best_individual(old_value, population, num_population, target)
 
-        if old_best_value != old_value[best_index][target]:
-            print("New Best!")
-            print(old_value[best_index][target])
+        #if old_best_value != old_value[best_index][target]:
+        #    print("New Best!")
+        #    print(old_value[best_index][target])
 
         crossover -= decrese_crossover
 
@@ -316,7 +316,7 @@ end_img_index = 3 #last number (NOT incluted)
 number_of_pixel = 5 #number of pixel that we will try to change
 show_image = False #False = don't show the image
 save = True #if you want to save the result
-num_images = 200 #set the number of images to be extracted
+num_images = 100 #set the number of images to be extracted
 iterations = 100
 population = 400
 crossover = 1
