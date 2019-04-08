@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import sys
-sys.path.append('../../convnets-keras/')
-#sys.path.append('convnets-keras/') #added in order to work with non-targeted
+#sys.path.append('../../convnets-keras/')
+sys.path.append('convnets-keras/') #added in order to work with non-targeted
 from convnetskeras.convnets import preprocess_image_batch, preprocess_in_values
 from tqdm import tqdm
 import os
