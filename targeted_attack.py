@@ -213,9 +213,9 @@ def differentialAlgorithm(model, target, img, iterations, num_population, F, ran
 
         best, best_index = get_best_individual(old_value, population, num_population, target)
 
-        if old_best_value != old_value[best_index][target]:
-            print("New Best!")
-            print(old_value[best_index][target])
+        #if old_best_value != old_value[best_index][target]:
+        #    print("New Best!")
+        #    print(old_value[best_index][target])
 
         crossover -= decrese_crossover
 
@@ -261,16 +261,16 @@ def fool_image(model, img, img_index, target, target_class, number_of_pixel, sho
     preds = model.predict(input)
 
     #print value returned by the network
-    print("\nInitial prediction:")
-    print(original_preds)
+    #print("\nInitial prediction:")
+    #print(original_preds)
 
     print("\nReal class: " + str(dict[target]))
 
     p_class = str(dict[get_max_class(original_preds)])
     print("\nPredicted class: " + p_class)
 
-    print("\nNew prediction:")
-    print(preds)
+    #print("\nNew prediction:")
+    #print(preds)
 
     p_class = str(dict[target_class])
     print("\nTarget class: " + p_class)
@@ -283,13 +283,13 @@ def fool_image(model, img, img_index, target, target_class, number_of_pixel, sho
     plt.imshow(img[0])
 
     #print values modified
-    print("\nModified pixels")
+    #print("\nModified pixels")
     index = 0
     string = ""
     for k in range(0, number_of_pixel):
         string += ", " + str(args[index]) + ", " + str(args[index + 1]) + ", " + str(args[index + 2]) + ", " + str(args[index + 3]) + ", " + str(args[index + 4])
-        print("Pixel: (" + str(args[index + 1]) + ", " + str(args[index]) + ")", end=", ")
-        print("Rgb: (" + str(args[index + 2]) + ", " + str(args[index + 3]) + ", " + str(args[index + 4]) + ")")
+        #print("Pixel: (" + str(args[index + 1]) + ", " + str(args[index]) + ")", end=", ")
+        #print("Rgb: (" + str(args[index + 2]) + ", " + str(args[index + 3]) + ", " + str(args[index + 4]) + ")")
         index += 5
 
     if show_image:
@@ -319,7 +319,7 @@ end_img_index = 3 #last number (NOT incluted)
 number_of_pixel = 5 #number of pixel that we will try to change
 show_image = False #False = don't show the image
 save = True #if you want to save the result
-num_images = 200 #set the number of images to be extracted
+num_images = 10 #set the number of images to be extracted
 iterations = 100
 population = 400
 crossover = 1
@@ -362,9 +362,10 @@ for i in range(0, num_images):
 
 if save:
     file = open("save/targeted_saves/results_%d_" % time.time() +str(number_of_pixel)+"_"+dict_nn[neuralnetwork]+".txt", "w")
-
+i = 0
 for img_index in images_list: #image that will be modified
-
+    print("Iteration: " +str(i))
+    i+=1
     img = x_test[img_index]
 
     target = y_test[img_index][0]
