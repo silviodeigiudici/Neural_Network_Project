@@ -16,9 +16,11 @@ def main():
     idx = model.getIdxMaxPred(pred)
     print("Indice max: " + str(idx))
     netClass = str(model.getClassByNum(idx))
+    print("List of Nums: " +str(images_imagenet.getListNums()) +'\n')
     print("Network class result: " + netClass)
     print("Network label result: "+ str(images_imagenet.getLabelByClass(netClass)))
     print("Real class: " + str(img_clas))
+    print("Num given class: " +str(images_imagenet.getNumByClass(img_clas)))
     print("Real label: " + str(images_imagenet.getLabelByClass(img_clas)))
 
 if __name__== "__main__":

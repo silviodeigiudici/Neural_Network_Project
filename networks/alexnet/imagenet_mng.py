@@ -71,6 +71,9 @@ class manager_imagenet():
     def preprocessing(self, imgs, num_images):
         preprocess_in_values(imgs, num_images) #side effect!!
 
+    def getListNums(self):
+        return list(self.dictOfImages.keys())
+
     def getClassByNum(self, num):
         if self._validNum(num):
             if self.cache or (num in list(self.dictOfImages.keys())) :
@@ -80,6 +83,13 @@ class manager_imagenet():
                 return self.dictOfImages[num]
         else:
             print("Error: the parameter 'number' is out bound of range: [0 ... 1000]")
+            return None
+
+    def getNumByClass(self, cls):
+        if self.dictLabels[cls]:
+            return int(list(self.dictLabels.keys()).index(cls))
+        else:
+            print("Error: no num associated with passed class")
             return None
 
     def getLabelByClass(self, cls):
