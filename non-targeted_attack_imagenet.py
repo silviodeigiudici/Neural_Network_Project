@@ -388,8 +388,7 @@ for img_index in images_list: #image that will be modified
     img = images_imagenet.getImgByNum(img_index)
     img_clas = images_imagenet.getClassByNum(img_index)
     print(img_clas)
-    #PAY ATTENTION THIS WORK ONLY WITH THE IMAGE N 1
-    target = 140 #??? it must be an index to the predict list
+    target = images_imagenet.getNumByClass(img_clas)
 
     res = fool_image(model, img, img_index, target, number_of_pixel, show_image, dict, save, file, \
                     iterations, population, F, range_pixel, range_rgb, crossover, decrese_crossover, images_imagenet)

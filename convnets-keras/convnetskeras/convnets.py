@@ -312,9 +312,9 @@ def preprocess_image_batch(image_paths, img_size=None, crop_size=None, color_mod
 
         img = img.astype('float32')
         # We normalize the colors (in RGB space) with the empirical means on the training set
-        img[:, :, 0] -= 123.68
-        img[:, :, 1] -= 116.779
-        img[:, :, 2] -= 103.939
+        #img[:, :, 0] -= 123.68
+        #img[:, :, 1] -= 116.779
+        #img[:, :, 2] -= 103.939
         # We permute the colors to get them in the BGR order
         if color_mode == 'bgr':
             img[:, :, [0, 1, 2]] = img[:, :, [2, 1, 0]]
