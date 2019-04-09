@@ -42,7 +42,7 @@ def get_max_class_new(preds):
         index += 1
     return index_max
 
-def print_images(images, file):
+def print_images(images_imagenet, file):
     f = open(file, "r")
     s = f.read()
     f.close()
@@ -52,16 +52,18 @@ def print_images(images, file):
         img_index = int(list_par[0].strip())
         number_of_pixel = int((len(list_par) - 2)/5)
         index = 1
-        image = images[img_index]
-        plt.imshow(image)
+        image_array = images_imagenet.getImgByNum(img_index)[0]
+        image_array = image_array.transpose((1, 2, 0))
+        image_array = image_array.astype('uint8')
+        plt.imshow(image_array)
         plt.show()
         for i in range(0, number_of_pixel):
             row = int(list_par[index])
             col = int(list_par[index + 1])
             rgb = int(list_par[index + 2]), int(list_par[index + 3]), int(list_par[index + 4])
-            image[row][col] = rgb
+            image_array[row][col] = rgb
             index += 5
-        plt.imshow(image)
+        plt.imshow(image_array)
         plt.show()
 
 '''
@@ -348,7 +350,7 @@ dict = { 0:"airplane", 1:"automobile", 2:"bird", 3:"cat", 4:"deer", 5:"dog", 6:"
 start_img_index = 1 #number of the first image used in cifar10
 end_img_index = 3 #last number (NOT incluted)
 number_of_pixel = 5 #number of pixel that we will try to change
-show_image = True #False = don't show the image
+show_image = False #False = don't show the image
 save = True #if you want to save the result
 num_images = 1 #set the number of images to be extracted
 iterations = 20
@@ -365,12 +367,13 @@ neuralnetwork = 3 #must be alexnet
 
 mispredicted_images = 0
 
-#use this function if you want to print all the images in the file Results
-#print_images(x_test, "save/results_non-targeted.txt")
 
 images_list = range(start_img_index, end_img_index) #USELESS if you use the random selection:
 
 images_imagenet = manager_imagenet("./networks/alexnet/our_labels.txt", "./networks/alexnet/alexnet_images/", False)
+
+#use this function if you want to print all the images in the file Results
+#print_images(images_imagenet, "./save/non-targeted_saves/results_1554756785_5_alexnet.txt")
 
 model = alexnet()
 
