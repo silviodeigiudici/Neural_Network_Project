@@ -225,11 +225,6 @@ def differentialAlgorithm(model, target, img, iterations, num_population, F, ran
 #function that compute a perturbation, trying to fool the network (True if the algorithm find a solution)
 def fool_image(model, img, img_index, target, number_of_pixel, show_image, dict, save, file, iterations, population, F, range_pixel, range_rgb, crossover, decrese_crossover):
 
-    #shows the original image
-    plt.imshow(img)
-    if show_image:
-        plt.show()
-
     input = np.ndarray((1, 32, 32, 3))
     input[0] = copy.deepcopy(img)
 
@@ -275,10 +270,6 @@ def fool_image(model, img, img_index, target, number_of_pixel, show_image, dict,
     n_class = str(dict[get_max_class(preds)])
     print("\nNew class: " + n_class)
 
-    #shows the modified image
-    img = input.astype('uint8')
-    plt.imshow(img[0])
-
     #print values modified
     print("\nModified pixels")
     index = 0
@@ -288,9 +279,6 @@ def fool_image(model, img, img_index, target, number_of_pixel, show_image, dict,
         print("Pixel: (" + str(args[index + 1]) + ", " + str(args[index]) + ")", end=", ")
         print("Rgb: (" + str(args[index + 2]) + ", " + str(args[index + 3]) + ", " + str(args[index + 4]) + ")")
         index += 5
-
-    if show_image:
-        plt.show()
 
     if p_class != n_class:
         if save:
@@ -314,7 +302,7 @@ dict = { 0:"airplane", 1:"automobile", 2:"bird", 3:"cat", 4:"deer", 5:"dog", 6:"
 start_img_index = 1 #number of the first image used in cifar10
 end_img_index = 3 #last number (NOT incluted)
 number_of_pixel = 5 #number of pixel that we will try to change
-show_image = False #False = don't show the image
+show_image = False #IT DOESN'T WORK, USE PRINT IMAGES False = don't show the image
 save = True #if you want to save the result
 num_images = 100 #set the number of images to be extracted
 iterations = 100
