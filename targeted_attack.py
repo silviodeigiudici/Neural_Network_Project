@@ -11,6 +11,8 @@ import random
 
 from tqdm import tqdm
 
+from utils.costants import all_classes_indices
+
 ##############################
 #SUPPORT FUNCTIONS
 #############################
@@ -310,7 +312,7 @@ end_img_index = 3 #last number (NOT incluted)
 number_of_pixel = 5 #number of pixel that we will try to change
 show_image = False #IT DOESN'T WORK, USE PRINT IMAGES False = don't show the image
 save = True #if you want to save the result
-num_images = 10 #set the number of images to be extracted
+num_images_for_class = 2 #set the number of images to be extracted for each class
 iterations = 100
 population = 400
 crossover = 1
@@ -341,35 +343,32 @@ elif neuralnetwork == 2:
 #use this function if you want to print all the images in the file Results
 #print_images(x_test, "save/results_targeted.txt")
 
-images_list = range(start_img_index, end_img_index) #USELESS if you use the random selection:
-
-
-#random images
-images_list = []
-max = len(x_test)
-for i in range(0, num_images):
-    images_list.append(randint(0, max))
-
-
 if save:
     file = open("save/targeted_saves/results_%d_" % time.time() +str(number_of_pixel)+"_"+dict_nn[neuralnetwork]+".txt", "w")
 i = 0
-for img_index in images_list: #image that will be modified
-    print("Iteration: " +str(i))
-    i+=1
-    img = x_test[img_index]
 
-    target = y_test[img_index][0]
+for class_indeces in all_classes_indices:
+    images_list = []
+    max = 1000 #there are always 1000 images for class in cifar10
+    for i in range(0, num_images_for_class):
+        random_index = randint(0, max)
+        images_list.append(class_indeces[random_index])
+        class_indeces.pop(random_index)
 
-    #y_train = keras.utils.to_categorical(y_train, 10) #trasform the class into an array (0 .. 1 ... 0)
-    #y_test = keras.utils.to_categorical(y_test, 10)
-    for classes_index in dict:
-        if classes_index != target:
-            res = fool_image(model, img, img_index, target, classes_index, number_of_pixel, show_image, dict, save, file, \
-                            iterations, population, F, range_pixel, range_rgb, crossover, decrese_crossover)
-            print(res)
-            if res == True:
-                mispredicted_images += 1
+    for img_index in images_list: #image that will be modified
+        print("Iteration: " +str(i))
+        i+=1
+        img = x_test[img_index]
+
+        target = y_test[img_index][0]
+
+        for classes_index in dict:
+            if classes_index != target:
+                res = fool_image(model, img, img_index, target, classes_index, number_of_pixel, show_image, dict, save, file, \
+                                iterations, population, F, range_pixel, range_rgb, crossover, decrese_crossover)
+                print(res)
+                if res == True:
+                    mispredicted_images += 1
 
 if save:
     file.close()
