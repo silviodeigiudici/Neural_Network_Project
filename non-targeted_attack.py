@@ -238,6 +238,9 @@ def fool_image(model, img, img_index, target, number_of_pixel, show_image, dict,
     original_preds = model.predict(input)
     if get_max_class(original_preds) != target:
         print("\nNetwork mispredict!")
+        if save:
+            line = str(img_index) + ",Success Mispredict" + "\n"
+            file.write(line)
         return True
 
     args, iterations_done = differentialAlgorithm(model, target, copy_input, iterations, population, F, range_pixel, range_rgb, dict, number_of_pixel, crossover, decrese_crossover)
