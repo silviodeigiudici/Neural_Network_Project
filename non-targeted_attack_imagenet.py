@@ -356,7 +356,7 @@ end_img_index = 3 #last number (NOT incluted)
 number_of_pixel = 5 #number of pixel that we will try to change
 show_image = False #False = don't show the image
 save = True #if you want to save the result
-num_images = 10 #set the number of images to be extracted
+num_images = 150 #set the number of images to be extracted
 iterations = 75
 population = 200
 crossover = 1
