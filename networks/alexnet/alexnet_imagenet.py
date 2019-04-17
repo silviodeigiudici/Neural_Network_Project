@@ -4,8 +4,7 @@ sys.path.append('convnets-keras/') #added in order to work with non-targeted
 from keras import backend as K
 from keras.optimizers import SGD
 from convnetskeras.convnets import convnet
-from convnetskeras.imagenet_tool import id_to_synset, pprint_output, id_to_words
-import numpy as np
+from convnetskeras.imagenet_tool import id_to_synset, synset_to_id, id_to_words
 
 class alexnet:
     def __init__(self):
@@ -17,7 +16,7 @@ class alexnet:
 
     def checkInBestFive(self, pred, idx_target):
         best_ids = pred[0].argsort()[::-1][:5]
-        return (idx_target in listBest, list(best_ids))
+        return (idx_target in best_ids, list(best_ids))
 
     def getIdxMaxPred(self, pred):
         best_ids = pred[0].argsort()[::-1][:1]
@@ -26,8 +25,11 @@ class alexnet:
     def getClassByNum(self, num):
         return str(id_to_synset(num))
 
+    def getNumByClass(self, img_cls):
+      return int(synset_to_id(img_cls))
+    
+    def getStrByClass(self, img_cls):
+      return id_to_words(img_cls)
+      
     def predict(self, elem):
       return self.model.predict(elem)
-    
-    def cose(self, out):
-      return pprint_output(out)

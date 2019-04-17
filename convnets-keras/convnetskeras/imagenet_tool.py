@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from os.path import dirname
 from os.path import join
-
+import numpy as np
 from scipy.io import loadmat
 
 meta_clsloc_file = join(dirname(__file__), 'data', 'meta_clsloc.mat')
@@ -42,7 +42,7 @@ def synset_to_dfs_ids(synset):
 
 
 def synset_to_id(synset):
-    a = next((i for (i, s) in synsets if s == synset), None)
+    a = next((i for (i, s, a, b, c, d, e, f) in synsets if s == synset), None)
     return a
 
 
