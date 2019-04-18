@@ -233,8 +233,8 @@ def differentialAlgorithm(model, target, img, iterations, num_population, F, ran
             if value[p][target] < old_value[p][target]:
                 population[p] = new_population[p]
                 old_value[p] = value[p]
-                if get_max_class_new(old_value[p]) != target:
-                    print(old_value[p])
+                isInTheBestFive, best_ids = model.checkInBestFive([old_value[p]], target)
+                if not isInTheBestFive:
                     return trasform_to_int(population[p]), iterations_done
 
         best, best_index = get_best_individual(old_value, population, num_population, target)
@@ -251,6 +251,11 @@ def differentialAlgorithm(model, target, img, iterations, num_population, F, ran
 def fool_image(model, img, img_index, target, number_of_pixel, show_image, dict, save, file, iterations, \
                 population, F, range_pixel, range_rgb, crossover, decrese_crossover, images_imagenet):
 
+    ########################
+    #constant
+    number_of_best_classes = 5
+    ########################
+
     #shows the original image
     if show_image:
         img_tf = img[0].copy()
@@ -265,11 +270,14 @@ def fool_image(model, img, img_index, target, number_of_pixel, show_image, dict,
     #predict the class of the original image
     images_imagenet.preprocessing(img, 1)
     original_preds = model.predict(img)
-    max_class_index = get_max_class(original_preds)
-    if max_class_index != target:
+    isInTheBestFive, best_ids = model.checkInBestFive(original_preds, target)
+    if not isInTheBestFive:
         print("\nNetwork mispredict!")
         if save:
-            line = str(img_index) + ",Success Mispredict " + str(model.getClassByNum(max_class_index)) + " " + str(model.getClassByNum(target)) + "\n"
+            string_to_print = str(model.getClassByNum(best_ids[0]))
+            for id_i in range(1, number_of_best_classes):
+                string_to_print += ";" + str(model.getClassByNum(best_ids[id_i]))
+            line = str(img_index) + ",Success Mispredict " + string_to_print + " " + str(model.getClassByNum(target)) + "\n"
             file.write(line)
         return True
 
@@ -298,23 +306,29 @@ def fool_image(model, img, img_index, target, number_of_pixel, show_image, dict,
     preds = model.predict(copy_input)
 
     #print value returned by the network
-    print("\nInitial prediction:")
-    print(original_preds)
+    #print("\nInitial prediction:")
+    #print(original_preds)
 
     netClass = str(model.getClassByNum(target))
     print("\nReal class: " + netClass)
     print("Real class label: "+ str(images_imagenet.getLabelByClass(netClass)))
 
-    p_class = str(model.getClassByNum(get_max_class(original_preds)))
-    print("\nPredicted class: " + p_class)
-    print("Predicted class label: "+ str(images_imagenet.getLabelByClass(p_class)))
+    isInTheBestFive, best_ids = model.checkInBestFive(original_preds, target)
+    p_class = str(model.getClassByNum(best_ids[0]))
+    for id_i in range(1, number_of_best_classes):
+        p_class += ";" + str(model.getClassByNum(best_ids[id_i]))
+    print("\nPredicted classes: " + p_class)
+    #print("Predicted class label: "+ str(images_imagenet.getLabelByClass(p_class)))
 
-    print("\nNew prediction:")
-    print(preds)
+    #print("\nNew prediction:")
+    #print(preds)
 
-    n_class = str(model.getClassByNum(get_max_class(preds)))
-    print("\nNew class: " + n_class)
-    print("New class label: "+ str(images_imagenet.getLabelByClass(n_class)))
+    isInTheBestFive, best_ids = model.checkInBestFive(preds, target)
+    n_class = str(model.getClassByNum(best_ids[0]))
+    for id_i in range(1, number_of_best_classes):
+        n_class += ";" + str(model.getClassByNum(best_ids[id_i]))
+    print("\nNew classes: " + n_class)
+    #print("New class label: "+ str(images_imagenet.getLabelByClass(n_class)))
 
     #print values modified
     print("\nModified pixels")
@@ -332,14 +346,14 @@ def fool_image(model, img, img_index, target, number_of_pixel, show_image, dict,
         plt.imshow(print_input)
         plt.show()
 
-    if p_class != n_class:
+    if not isInTheBestFive:
         if save:
-            line = str(img_index) + string + ",Success " + n_class + " " + str(iterations_done) + "\n"
+            line = str(img_index) + string + ",Success " + n_class + "|" + p_class + "|" + netClass + " " + str(iterations_done) + "\n"
             file.write(line)
         return True
     else:
         if save:
-            line = str(img_index) + string + ",Fail " + n_class + "\n"
+            line = str(img_index) + string + ",Fail " + n_class + "|" + p_class + "|" + netClass + "\n"
             file.write(line)
         return False
 

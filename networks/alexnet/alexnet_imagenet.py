@@ -27,9 +27,9 @@ class alexnet:
 
     def getNumByClass(self, img_cls):
       return int(synset_to_id(img_cls))
-    
+
     def getStrByClass(self, img_cls):
       return id_to_words(img_cls)
-      
+
     def predict(self, elem):
       return self.model.predict(elem)
