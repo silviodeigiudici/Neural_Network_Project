@@ -81,15 +81,11 @@ def get_random_input(number_of_pixel):
         perturbations += get_random_perturbation()
     return perturbations
 
-def new_par(population, F, limit, i_parameter, num_population, best, individual_index, crossover, j, example):
+def new_par(population, F, limit, i_parameter, num_population, best, individual_index, crossover, j, example, i_a, i_b):
 
     if random.uniform(0, 1) > crossover and i_parameter != j:
         return example[i_parameter]
 
-    random_list_0 = list(range(0, individual_index))
-    random_list_1 = list(range(individual_index + 1, num_population))
-    random_list = random_list_0 + random_list_1
-    i_a, i_b = random.sample(random_list, 2)
     a = population[i_a][i_parameter]
     b = population[i_b][i_parameter]
     return (best[i_parameter] + F*(a - b)) % limit
@@ -133,11 +129,17 @@ def new_son(population, F, range_pixel, range_rgb, num_population, best, number_
     index = 0
     perturbations = ()
     for i_pixel in indeces:
-        row = new_par(population, F, range_pixel, index, num_population, best, individual_index, crossover, j, example)
-        col = new_par(population, F, range_pixel, index + 1, num_population, best, individual_index, crossover, j, example)
-        r = new_par(population, F, range_rgb, index + 2, num_population, best, individual_index, crossover, j, example)
-        g = new_par(population, F, range_rgb, index + 3, num_population, best, individual_index, crossover, j, example)
-        b = new_par(population, F, range_rgb, index + 4, num_population, best, individual_index, crossover, j, example)
+
+        random_list_0 = list(range(0, individual_index))
+        random_list_1 = list(range(individual_index + 1, num_population))
+        random_list = random_list_0 + random_list_1
+        i_a, i_b = random.sample(random_list, 2)
+
+        row = new_par(population, F, range_pixel, index, num_population, best, individual_index, crossover, j, example, i_a, i_b)
+        col = new_par(population, F, range_pixel, index + 1, num_population, best, individual_index, crossover, j, example, i_a, i_b)
+        r = new_par(population, F, range_rgb, index + 2, num_population, best, individual_index, crossover, j, example, i_a, i_b)
+        g = new_par(population, F, range_rgb, index + 3, num_population, best, individual_index, crossover, j, example, i_a, i_b)
+        b = new_par(population, F, range_rgb, index + 4, num_population, best, individual_index, crossover, j, example, i_a, i_b)
         perturbations += row, col, r, g, b
         index += 5
     return perturbations
@@ -216,8 +218,8 @@ def differentialAlgorithm(model, target, img, iterations, num_population, F, ran
         best, best_index = get_best_individual(old_value, population, num_population, target)
 
         #if old_best_value != old_value[best_index][target]:
-        #    print("New Best!")
-        #    print(old_value[best_index][target])
+            #print("New Best!")
+            #print(old_value[best_index][target])
 
         crossover -= decrese_crossover
 
@@ -309,7 +311,7 @@ def fool_image(model, img, img_index, target, target_class, number_of_pixel, sho
 dict = { 0:"airplane", 1:"automobile", 2:"bird", 3:"cat", 4:"deer", 5:"dog", 6:"frog", 7:"horse", 8:"ship", 9:"truck"}
 start_img_index = 2 #number of the first image used in cifar10
 end_img_index = 3 #last number (NOT incluted)
-number_of_pixel = 5 #number of pixel that we will try to change
+number_of_pixel = 1 #number of pixel that we will try to change
 show_image = False #IT DOESN'T WORK, USE PRINT IMAGES False = don't show the image
 save = True #if you want to save the result
 num_images_for_class = 2 #set the number of images to be extracted for each class
@@ -321,7 +323,7 @@ range_pixel = 32
 range_rgb = 256
 F = 0.5
 dict_nn = {0: "vgg16",1: "NiN",2: "allcnn"}
-neuralnetwork = 0 #0 for vgg16, 1 for nin, 2 for allcnn
+neuralnetwork = 1 #0 for vgg16, 1 for nin, 2 for allcnn
 ###############################
 
 mispredicted_images = 0
@@ -356,7 +358,7 @@ for class_indeces in all_classes_indices:
         class_indeces.pop(random_index)
 
     for img_index in images_list: #image that will be modified
-        print("Iteration: " +str(i))
+        #print("Iteration: " +str(i))
         i+=1
         img = x_test[img_index]
 
